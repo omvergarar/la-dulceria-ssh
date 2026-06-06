@@ -1,0 +1,55 @@
+# Dependencias
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+.next/
+out/
+dist/
+
+# Variables de entorno — NUNCA subir al repo
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (almacenar en el servidor, no en git)
+public/uploads/productos/*.jpg
+public/uploads/productos/*.jpeg
+public/uploads/productos/*.png
+public/uploads/productos/*.webp
+public/uploads/productos/*.gif
+!public/uploads/productos/.gitkeep
+
+# Archivos de deploy local
+la-dulceria-deploy.tar.gz
+database.sql
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude Code
+.claude/
+
+# Office temp files
+~$*
+
+# MySQL Workbench
+*.mwb
+*.mwb.bak

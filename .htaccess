@@ -1,0 +1,12 @@
+# Hostinger — Redirige todo al servidor Next.js en puerto 3000
+# Usar cuando el hosting es Node.js Web App (Passenger / proxy)
+
+RewriteEngine On
+RewriteCond %{SERVER_PORT} !^3000$
+RewriteRule ^(.*)$ http://localhost:3000/$1 [P,L]
+
+# Seguridad
+Options -Indexes
+Header set X-Frame-Options "SAMEORIGIN"
+Header set X-Content-Type-Options "nosniff"
+Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"

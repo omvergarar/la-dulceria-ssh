@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Nunito:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === CSS Variables del prototipo === */
+:root {
+  --primary: #fbddf9;
+  --primary-dark: #f5bef2;
+  --primary-deeper: #e89ee4;
+  --secondary: #ffffff;
+  --accent: #c96bc4;
+  --accent-dark: #a3509e;
+  --text-dark: #2d1a2b;
+  --text-medium: #5a3d58;
+  --text-light: #9a7898;
+  --bg-soft: #fef6fe;
+  --bg-cream: #fffaff;
+  --green: #4caf7d;
+  --yellow: #f0b429;
+  --red: #e53e3e;
+  --shadow-soft: 0 4px 24px rgba(201, 107, 196, 0.12);
+  --shadow-card: 0 2px 16px rgba(45, 26, 43, 0.08);
+  --shadow-hover: 0 8px 32px rgba(201, 107, 196, 0.22);
+  --radius: 18px;
+  --radius-sm: 10px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === Reset base === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  color: var(--text-dark);
+  background: var(--bg-cream);
+  overflow-x: hidden;
+}
+
+/* === Animaciones === */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-18px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+@keyframes pulse_wa {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); }
+  50% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* === Clases utilitarias de diseño === */
+@layer components {
+  .btn-primary {
+    @apply bg-accent text-white px-7 py-3 rounded-full font-bold text-base transition-all hover:bg-accent-dark hover:-translate-y-0.5;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .btn-outline {
+    @apply border-2 border-accent text-accent px-7 py-3 rounded-full font-bold text-base transition-all hover:bg-accent hover:text-white;
+  }
+
+  .btn-secondary {
+    @apply bg-primary text-accent-dark px-5 py-2 rounded-full font-bold text-sm transition-all hover:bg-primary-dark;
+  }
+
+  .section-header {
+    @apply text-center mb-12;
+  }
+
+  .section-header h2 {
+    @apply font-serif text-3xl md:text-4xl text-text-dark mb-3;
+  }
+
+  .section-header p {
+    @apply text-text-medium max-w-lg mx-auto;
+  }
+
+  .form-input {
+    @apply w-full px-4 py-2.5 border-2 border-primary-dark rounded-lg text-sm bg-white text-text-dark focus:border-accent focus:outline-none transition-colors;
+  }
+
+  .form-label {
+    @apply block font-semibold text-sm text-text-medium mb-1.5;
+  }
+
+  .badge-estado-pendiente {
+    @apply bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-xs font-bold;
+  }
+  .badge-estado-pagado {
+    @apply bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs font-bold;
+  }
+  .badge-estado-enviado {
+    @apply bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs font-bold;
+  }
+  .badge-estado-cancelado {
+    @apply bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-xs font-bold;
+  }
+}
+
+/* === Fade in al hacer scroll === */
+.fade-in {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* === Scrollbar personalizado === */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-soft);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--primary-deeper);
+  border-radius: 3px;
+}

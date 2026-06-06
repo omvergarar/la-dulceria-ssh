@@ -1,0 +1,191 @@
+// Prisma Schema — La Dulcería tienda de regalos
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Cliente {
+  id              Int           @id @default(autoincrement())
+  nombre          String        @db.VarChar(100)
+  email           String        @unique @db.VarChar(150)
+  contrasena      String        @db.VarChar(255)
+  telefono        String?       @db.VarChar(20)
+  direccion       String?       @db.VarChar(300)
+  activo          Boolean       @default(true)
+  fechaRegistro   DateTime      @default(now()) @map("fecha_registro")
+  ordenes         Orden[]
+  codigosUsados   CodigoUsado[]
+
+  @@map("clientes")
+}
+
+model Producto {
+  id            Int            @id @default(autoincrement())
+  nombre        String         @db.VarChar(150)
+  descripcion   String         @db.Text
+  precio        Decimal        @db.Decimal(12, 2)
+  stock         Int            @default(0)
+  categoria     String         @db.VarChar(80)
+  imagenUrl     String?        @map("imagen_url") @db.VarChar(500)
+  activo        Boolean        @default(true)
+  fechaCreacion DateTime       @default(now()) @map("fecha_creacion")
+  detalles      DetalleOrden[]
+  fotos         FotoProducto[]
+
+  @@map("productos")
+}
+
+// Fotos adicionales por producto (máximo 3)
+model FotoProducto {
+  id         Int      @id @default(autoincrement())
+  productoId Int      @map("producto_id")
+  url        String   @db.VarChar(500)
+  orden      Int      @default(0)
+  creadoEn   DateTime @default(now()) @map("creado_en")
+  producto   Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+
+  @@map("fotos_producto")
+}
+
+model Orden {
+  id               Int            @id @default(autoincrement())
+  clienteId        Int            @map("cliente_id")
+  total            Decimal        @db.Decimal(12, 2)
+  estado           EstadoOrden    @default(pendiente)
+  fecha            DateTime       @default(now())
+  referenciaPago   String?        @map("referencia_pago") @db.VarChar(200)
+  direccionEnvio   String?        @map("direccion_envio") @db.VarChar(300)
+  notas            String?        @db.VarChar(500)
+  codigoPromo      String?        @map("codigo_promo") @db.VarChar(50)
+  descuentoAplicado Decimal?      @map("descuento_aplicado") @db.Decimal(12, 2)
+  cliente          Cliente        @relation(fields: [clienteId], references: [id])
+  detalles         DetalleOrden[]
+
+  @@map("ordenes")
+}
+
+model DetalleOrden {
+  id             Int      @id @default(autoincrement())
+  ordenId        Int      @map("orden_id")
+  productoId     Int      @map("producto_id")
+  cantidad       Int
+  precioUnitario Decimal  @map("precio_unitario") @db.Decimal(12, 2)
+  mensaje        String?  @db.VarChar(1000)
+  orden          Orden    @relation(fields: [ordenId], references: [id])
+  producto       Producto @relation(fields: [productoId], references: [id])
+
+  @@map("detalles_orden")
+}
+
+// Reseñas de clientes (requieren aprobación antes de publicarse)
+model Resena {
+  id        Int      @id @default(autoincrement())
+  nombre    String   @db.VarChar(100)
+  ciudad    String?  @db.VarChar(100)
+  texto     String   @db.Text
+  estrellas Int
+  aprobada  Boolean  @default(false)
+  creadoEn  DateTime @default(now()) @map("creado_en")
+
+  @@map("resenas")
+}
+
+// Control de uso único de códigos de descuento por cliente
+model CodigoUsado {
+  id        Int      @id @default(autoincrement())
+  clienteId Int      @map("cliente_id")
+  codigo    String   @db.VarChar(50)
+  usadoEn   DateTime @default(now()) @map("usado_en")
+  cliente   Cliente  @relation(fields: [clienteId], references: [id])
+
+  @@unique([clienteId, codigo])
+  @@map("codigos_usados")
+}
+
+// Configuración global de la tienda (fila única, id=1)
+model ConfigTienda {
+  id                  Int     @id @default(autoincrement())
+  bannerActivo        Boolean @default(true) @map("banner_activo")
+  codigoPromo         String  @default("DULCE15") @map("codigo_promo") @db.VarChar(50)
+  descuentoPorcentaje Int     @default(15) @map("descuento_porcentaje")
+  envioGratisDesde    Int     @default(120000) @map("envio_gratis_desde")
+
+  @@map("config_tienda")
+}
+
+// Historial de códigos promocionales
+model CodigoPromo {
+  id          Int      @id @default(autoincrement())
+  codigo      String   @unique @db.VarChar(50)
+  descuento   Int
+  activo      Boolean  @default(true)
+  descripcion String?  @db.VarChar(200)
+  creadoEn    DateTime @default(now()) @map("creado_en")
+
+  @@map("codigos_promo")
+}
+
+// Fotos del carrusel de la página principal
+model FotoCarrusel {
+  id          Int      @id @default(autoincrement())
+  url         String   @db.VarChar(500)
+  titulo      String?  @db.VarChar(150)
+  descripcion String?  @db.VarChar(300)
+  orden       Int      @default(0)
+  activo      Boolean  @default(true)
+  creadoEn    DateTime @default(now()) @map("creado_en")
+
+  @@map("fotos_carrusel")
+}
+
+// Temas de color guardados por el admin
+model TemaColor {
+  id            Int      @id @default(autoincrement())
+  nombre        String   @db.VarChar(100)
+  primary       String   @db.VarChar(20)
+  primaryDark   String   @map("primary_dark") @db.VarChar(20)
+  primaryDeeper String   @map("primary_deeper") @db.VarChar(20)
+  accent        String   @db.VarChar(20)
+  accentDark    String   @map("accent_dark") @db.VarChar(20)
+  textDark      String   @map("text_dark") @db.VarChar(20)
+  creadoEn      DateTime @default(now()) @map("creado_en")
+
+  @@map("temas_color")
+}
+
+// Tema activo actualmente (fila única, id=1)
+model TemaActivo {
+  id            Int    @id @default(autoincrement())
+  nombre        String @default("Original") @db.VarChar(100)
+  primary       String @default("#fbddf9") @db.VarChar(20)
+  primaryDark   String @default("#f5bef2") @map("primary_dark") @db.VarChar(20)
+  primaryDeeper String @default("#e89ee4") @map("primary_deeper") @db.VarChar(20)
+  accent        String @default("#c96bc4") @db.VarChar(20)
+  accentDark    String @default("#a3509e") @map("accent_dark") @db.VarChar(20)
+  textDark      String @default("#2d1a2b") @map("text_dark") @db.VarChar(20)
+
+  @@map("tema_activo")
+}
+
+// Categorías de productos gestionadas por el administrador
+model Categoria {
+  id        Int      @id @default(autoincrement())
+  nombre    String   @unique @db.VarChar(80)
+  activo    Boolean  @default(true)
+  orden     Int      @default(0)
+  creadoEn  DateTime @default(now()) @map("creado_en")
+
+  @@map("categorias")
+}
+
+enum EstadoOrden {
+  pendiente
+  pagado
+  enviado
+  cancelado
+}

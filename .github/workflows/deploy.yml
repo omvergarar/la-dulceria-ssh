@@ -1,0 +1,56 @@
+name: Deploy a Hostinger
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Generar cliente Prisma
+        run: npx prisma generate
+
+      - name: Build de producción
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          WOMPI_PUBLIC_KEY: ${{ secrets.WOMPI_PUBLIC_KEY }}
+          WOMPI_PRIVATE_KEY: ${{ secrets.WOMPI_PRIVATE_KEY }}
+          WOMPI_EVENTS_SECRET: ${{ secrets.WOMPI_EVENTS_SECRET }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXTAUTH_URL }}
+          NEXT_PUBLIC_WOMPI_PUBLIC_KEY: ${{ secrets.WOMPI_PUBLIC_KEY }}
+          NEXT_PUBLIC_WHATSAPP_NUMBER: ${{ secrets.NEXT_PUBLIC_WHATSAPP_NUMBER }}
+
+      - name: Deploy via SSH a Hostinger
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            cd /home/${{ secrets.SSH_USER }}/domains/${{ secrets.DOMAIN }}/public_html
+            git pull origin main
+            npm ci --omit=dev
+            npx prisma generate
+            npx prisma migrate deploy
+            npm run build
+            pm2 reload ecosystem.config.js --update-env
+            echo "✅ Deploy completado"
