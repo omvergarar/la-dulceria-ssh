@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Subir cambios por SSH
+    name: Subir cambios por FTP FTPS
 
     steps:
       - name: Checkout repositorio
@@ -16,41 +16,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Verificar secretos SSH
-        run: |
-          echo "Longitud SSH_HOST: ${#SSH_HOST}"
-          echo "Longitud SSH_USER: ${#SSH_USER}"
-          echo "Longitud SSH_PASSWORD: ${#SSH_PASSWORD}"
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-
-      - name: Instalar sshpass
-        run: sudo apt-get install -y sshpass
-
-      - name: Subir archivos modificados via SFTP
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-        run: |
-          CHANGED=$(git diff HEAD~1 HEAD --name-only --diff-filter=ACM | grep "^wp-content/")
-          echo "Archivos a subir:"
-          echo "$CHANGED"
-
-          if [ -z "$CHANGED" ]; then
-            echo "Sin cambios en wp-content/, nada que subir."
-            exit 0
-          fi
-
-          for FILE in $CHANGED; do
-            if [ -f "$FILE" ]; then
-              REMOTE_PATH="/home/$SSH_USER/domains/ladulceriaregalos.com/public_html/${FILE}"
-              echo "Subiendo: $FILE -> $REMOTE_PATH"
-              sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -P 65002 \
-                "$FILE" "$SSH_USER@$SSH_HOST:$REMOTE_PATH"
-              echo "OK: $FILE"
-            fi
-          done
-          echo "Deploy completado."
+      - name: Subir archivos modificados via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          protocol: ftps
+          local-dir: ./wp-content/
+          server-dir: /wp-content/
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/*.md
