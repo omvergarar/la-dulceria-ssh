@@ -36,7 +36,7 @@ jobs:
 
           for FILE in $CHANGED; do
             if [ -f "$FILE" ]; then
-              REMOTE_PATH="${FILE}"
+              REMOTE_PATH="/public_html/${FILE}"
               echo "Subiendo: $FILE -> $REMOTE_PATH"
               lftp -d -c "
                 set ftp:ssl-allow no;
