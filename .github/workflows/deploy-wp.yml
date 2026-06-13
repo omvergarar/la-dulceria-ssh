@@ -16,6 +16,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Verificar secretos SSH
+        run: |
+          echo "Longitud SSH_HOST: ${#SSH_HOST}"
+          echo "Longitud SSH_USER: ${#SSH_USER}"
+          echo "Longitud SSH_PASSWORD: ${#SSH_PASSWORD}"
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+
       - name: Instalar sshpass
         run: sudo apt-get install -y sshpass
 
