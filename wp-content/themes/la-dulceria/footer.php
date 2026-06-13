@@ -38,7 +38,7 @@
     <div>
       <h4>Información</h4>
       <span style="font-size:.875rem;display:block;margin-bottom:8px;">📞 +57-312-350-1815</span>
-      <span style="font-size:.875rem;display:block;margin-bottom:8px;">📧 hola@ladulceria.co</span>
+      <span style="font-size:.875rem;display:block;margin-bottom:8px;">📧 administracion@ladulceriaregalos.com</span>
       <a href="https://ladulceriaregalos.com/terminos-y-condiciones/">Términos y condiciones</a>
     </div>
   </div>

@@ -227,7 +227,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
       <div id="ldContactoMsg" style="display:none;text-align:center;padding:32px;">
         <span style="font-size:3rem;display:block;margin-bottom:12px;">✅</span>
         <h4 style="font-family:'Playfair Display',serif;font-size:1.25rem;">¡Mensaje enviado!</h4>
-        <p style="color:var(--text-medium);margin-top:8px;">Te responderemos pronto.</p>
+        <p style="color:var(--text-medium);margin-top:8px;">Te responderemos pronto a través de <strong>administracion@ladulceriaregalos.com</strong></p>
       </div>
       <form id="ldContactoForm">
         <div class="ld-form-group">
