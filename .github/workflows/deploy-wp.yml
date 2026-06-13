@@ -17,7 +17,7 @@ jobs:
       - name: Instalar lftp
         run: sudo apt-get install -y lftp
 
-      - name: Deploy via FTP
+      - name: Deploy tema
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -28,7 +28,13 @@ jobs:
             set ssl:verify-certificate no;
             open -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER;
             mirror -R --verbose \
-              wp-content/ \
-              /public_html/wp-content/;
+              wp-content/themes/la-dulceria/ \
+              /public_html/wp-content/themes/la-dulceria/;
+            mirror -R --verbose \
+              wp-content/plugins/dulceria-features/ \
+              /public_html/wp-content/plugins/dulceria-features/;
+            mirror -R --verbose \
+              wp-content/plugins/dulceria-wompi/ \
+              /public_html/wp-content/plugins/dulceria-wompi/;
             bye
           "
