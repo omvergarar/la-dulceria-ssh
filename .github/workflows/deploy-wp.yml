@@ -15,20 +15,16 @@ jobs:
     steps:
       - name: Checkout repositorio
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Deploy tema y plugins a Hostinger
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
-          local-dir: src/components/la-dulceria-wp/wp-content/
+          local-dir: ./src/components/la-dulceria-wp/wp-content/
           server-dir: /public_html/wp-content/
           exclude: |
             **/.git*
             **/.git*/**
-            **/node_modules/**
             **/*.md
