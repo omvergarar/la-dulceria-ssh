@@ -46,13 +46,8 @@ $is_admin   = current_user_can('manage_options') || current_user_can('administra
       <!-- Auth -->
       <?php if ($logged_in): ?>
         <div class="ld-navbar-auth" style="display:flex;gap:8px;align-items:center;">
-          <?php if ($is_admin): ?>
-            <a href="<?= admin_url('admin.php?page=ld-dashboard') ?>"
-               class="ld-navbar-btn" style="font-size:.8rem;padding:6px 14px;">Admin</a>
-          <?php else: ?>
             <a href="<?= wc_get_account_endpoint_url('') ?>"
                style="font-size:.875rem;font-weight:600;color:var(--text-medium);">Mi cuenta</a>
-          <?php endif; ?>
           <a href="<?= wp_logout_url(home_url('/')) ?>"
              style="font-size:.875rem;font-weight:600;color:var(--text-light);">Salir</a>
         </div>
