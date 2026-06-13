@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'src/components/la-dulceria-wp/**'
+      - '.github/workflows/deploy-wp.yml'
 
 jobs:
   deploy:
@@ -15,6 +16,16 @@ jobs:
     steps:
       - name: Checkout repositorio
         uses: actions/checkout@v4
+
+      - name: Verificar secretos
+        run: |
+          if [ -z "${{ secrets.FTP_SERVER }}" ]; then
+            echo "ERROR: FTP_SERVER esta vacio"
+          else
+            echo "FTP_SERVER tiene valor (longitud: ${#FTP_SERVER})"
+          fi
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@4.3.4
