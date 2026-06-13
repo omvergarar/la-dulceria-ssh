@@ -27,13 +27,13 @@ jobs:
             set ftp:ssl-allow no;
             set ssl:verify-certificate no;
             open -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER;
-            mirror -R --verbose \
+            mirror -R --verbose --transfer-all \
               wp-content/themes/la-dulceria/ \
               /public_html/wp-content/themes/la-dulceria/;
-            mirror -R --verbose \
+            mirror -R --verbose --transfer-all \
               wp-content/plugins/dulceria-features/ \
               /public_html/wp-content/plugins/dulceria-features/;
-            mirror -R --verbose \
+            mirror -R --verbose --transfer-all \
               wp-content/plugins/dulceria-wompi/ \
               /public_html/wp-content/plugins/dulceria-wompi/;
             bye
