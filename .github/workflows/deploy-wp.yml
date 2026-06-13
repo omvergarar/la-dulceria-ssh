@@ -17,25 +17,20 @@ jobs:
       - name: Checkout repositorio
         uses: actions/checkout@v4
 
-      - name: Verificar secretos
-        run: |
-          if [ -z "${{ secrets.FTP_SERVER }}" ]; then
-            echo "ERROR: FTP_SERVER esta vacio"
-          else
-            echo "FTP_SERVER tiene valor (longitud: ${#FTP_SERVER})"
-          fi
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+      - name: Instalar lftp
+        run: sudo apt-get install -y lftp
 
       - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@4.3.4
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./src/components/la-dulceria-wp/wp-content/
-          server-dir: /public_html/wp-content/
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/*.md
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          lftp -c "
+            set ftp:ssl-allow no;
+            open -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER;
+            mirror -R --delete --verbose \
+              src/components/la-dulceria-wp/wp-content/ \
+              /public_html/wp-content/;
+            bye
+          "
