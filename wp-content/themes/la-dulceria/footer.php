@@ -39,7 +39,7 @@
       <h4>Información</h4>
       <span style="font-size:.875rem;display:block;margin-bottom:8px;">📞 +57-312-350-1815</span>
       <span style="font-size:.875rem;display:block;margin-bottom:8px;">📧 hola@ladulceria.co</span>
-      <a href="#">Política de envíos</a>
+      <a href="#">Términos y condiciones</a>
     </div>
   </div>
 
