@@ -150,10 +150,157 @@ get_header();
 
 <?php if (is_user_logged_in()): ?>
 
-  <?php
-  // Usuario logueado: mostrar panel de cuenta WooCommerce
-  echo do_shortcode('[woocommerce_my_account]');
-  ?>
+<?php if (is_wc_endpoint_url()):
+    // Subpágina (pedidos, direcciones, datos) — WooCommerce la maneja
+    echo do_shortcode('[woocommerce_my_account]');
+else:
+    // Dashboard principal — diseño personalizado
+    $user       = wp_get_current_user();
+    $nombre     = $user->first_name ?: $user->display_name;
+    $pedidos    = wc_get_orders(['customer' => get_current_user_id(), 'limit' => -1, 'return' => 'ids']);
+    $n_pedidos  = count($pedidos);
+?>
+<style>
+.ld-account-wrap {
+  background: linear-gradient(135deg,#fdf0fd 0%,#fce4fc 100%);
+  min-height: 80vh;
+  padding: 48px 24px;
+}
+.ld-account-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.ld-account-header img {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(201,107,196,.25);
+  margin-bottom: 14px;
+}
+.ld-account-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: #2d1a2b;
+  margin: 0 0 4px;
+}
+.ld-account-header p {
+  color: #9a7898;
+  font-size: .875rem;
+  margin: 0;
+}
+.ld-account-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  max-width: 720px;
+  margin: 0 auto 32px;
+}
+.ld-account-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px 20px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(201,107,196,.1);
+  text-decoration: none;
+  color: inherit;
+  transition: transform .2s, box-shadow .2s;
+  display: block;
+  border: 2px solid transparent;
+}
+.ld-account-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 28px rgba(201,107,196,.2);
+  border-color: #f5bef2;
+}
+.ld-account-card .ld-card-icon {
+  font-size: 2.25rem;
+  margin-bottom: 12px;
+  display: block;
+}
+.ld-account-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2d1a2b;
+  margin: 0 0 6px;
+}
+.ld-account-card p {
+  font-size: .8rem;
+  color: #9a7898;
+  margin: 0;
+  line-height: 1.5;
+}
+.ld-account-card .ld-badge-count {
+  display: inline-block;
+  background: linear-gradient(135deg,#c96bc4,#a855a8);
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 50px;
+  margin-top: 8px;
+}
+.ld-logout-wrap {
+  text-align: center;
+}
+.ld-logout-wrap a {
+  font-size: .875rem;
+  color: #9a7898;
+  text-decoration: none;
+  border: 1px solid #ecd6ec;
+  padding: 8px 24px;
+  border-radius: 50px;
+  display: inline-block;
+  transition: background .2s;
+}
+.ld-logout-wrap a:hover {
+  background: #fdf0fd;
+  color: #c96bc4;
+}
+</style>
+
+<div class="ld-account-wrap">
+  <div class="ld-account-header">
+    <img src="<?= get_template_directory_uri() ?>/assets/images/logo.png" alt="La Dulcería">
+    <h2>¡Hola, <?= esc_html($nombre) ?>! 🌸</h2>
+    <p>Bienvenida a tu cuenta en La Dulcería</p>
+  </div>
+
+  <div class="ld-account-grid">
+
+    <a href="<?= wc_get_account_endpoint_url('orders') ?>" class="ld-account-card">
+      <span class="ld-card-icon">📦</span>
+      <h3>Mis pedidos</h3>
+      <p>Revisa el estado de tus compras</p>
+      <?php if ($n_pedidos > 0): ?>
+        <span class="ld-badge-count"><?= $n_pedidos ?> pedido<?= $n_pedidos !== 1 ? 's' : '' ?></span>
+      <?php endif; ?>
+    </a>
+
+    <a href="<?= home_url('/tienda') ?>" class="ld-account-card">
+      <span class="ld-card-icon">🛍️</span>
+      <h3>Ver catálogo</h3>
+      <p>Descubre nuestros regalos especiales</p>
+    </a>
+
+    <a href="<?= wc_get_account_endpoint_url('edit-address') ?>" class="ld-account-card">
+      <span class="ld-card-icon">📍</span>
+      <h3>Mis direcciones</h3>
+      <p>Gestiona tus direcciones de envío</p>
+    </a>
+
+    <a href="<?= wc_get_account_endpoint_url('edit-account') ?>" class="ld-account-card">
+      <span class="ld-card-icon">⚙️</span>
+      <h3>Mis datos</h3>
+      <p>Actualiza tu nombre, correo y contraseña</p>
+    </a>
+
+  </div>
+
+  <div class="ld-logout-wrap">
+    <a href="<?= wp_logout_url(home_url('/')) ?>">Cerrar sesión</a>
+  </div>
+</div>
+
+<?php endif; ?>
 
 <?php else: ?>
 
