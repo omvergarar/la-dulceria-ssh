@@ -41,7 +41,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
     </div>
     <div class="ld-modal-actions">
       <a href="<?= home_url('/tienda') ?>" class="btn-primary">Ver catálogo 🛍️</a>
-      <a href="<?= wc_get_page_permalink('myaccount') ?>" class="btn-outline">Registrarme</a>
+      <a href="<?= esc_url(add_query_arg('register', '1', wc_get_page_permalink('myaccount'))) ?>" class="btn-outline">Registrarme</a>
       <button id="ldModalCerrar" style="background:none;border:none;color:var(--text-light);font-size:.875rem;cursor:pointer;margin-top:4px;">Continuar sin registrarme</button>
     </div>
   </div>
@@ -266,7 +266,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
   <div style="max-width:380px;margin:0 auto;text-align:center;" class="fade-in">
     <h2 style="font-family:'Playfair Display',serif;font-size:1.875rem;color:var(--text-dark);margin-bottom:12px;">¿Quieres recibir ofertas exclusivas? 🌸</h2>
     <p style="color:var(--text-medium);margin-bottom:32px;">Regístrate y recibe tu código de descuento especial</p>
-    <a href="<?= wc_get_page_permalink('myaccount') ?>" class="btn-primary"
+    <a href="<?= esc_url(add_query_arg('register', '1', wc_get_page_permalink('myaccount'))) ?>" class="btn-primary"
        style="font-size:1.1rem;padding:16px 40px;">Registrarme</a>
   </div>
 </section>
