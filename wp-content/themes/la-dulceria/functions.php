@@ -198,13 +198,11 @@ add_filter('woocommerce_add_to_cart_fragments', function ($fragments) {
     return $fragments;
 });
 
-// ── Texto de privacidad en formulario de registro ────────────
-add_filter('woocommerce_get_privacy_policy_text', function ($text, $type) {
-    if ($type === 'registration') {
-        return 'Tus datos serán tratados conforme a la <strong>Ley 1581 de 2012</strong> de protección de datos personales de Colombia.';
-    }
-    return $text;
-}, 10, 2);
+// ── Reemplazar texto de privacidad en formulario de registro ──
+add_action('woocommerce_register_form', function () {
+    remove_action('woocommerce_register_form', ['WC_Privacy_Policy_Content', 'privacy_policy_checkbox']);
+    echo '<p style="font-size:.75rem;color:#9a7898;margin-top:8px;">Tus datos serán tratados conforme a la <strong>Ley 1581 de 2012</strong> de protección de datos personales de Colombia.</p>';
+}, 1);
 
 // ── Endpoint para purgar caché después del deploy ─────────────
 add_action('rest_api_init', function () {
