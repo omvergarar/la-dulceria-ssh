@@ -198,6 +198,14 @@ add_filter('woocommerce_add_to_cart_fragments', function ($fragments) {
     return $fragments;
 });
 
+// ── Texto de privacidad en formulario de registro ────────────
+add_filter('woocommerce_get_privacy_policy_text', function ($text, $type) {
+    if ($type === 'registration') {
+        return 'Tus datos serán tratados conforme a la <strong>Ley 1581 de 2012</strong> de protección de datos personales de Colombia.';
+    }
+    return $text;
+}, 10, 2);
+
 // ── Endpoint para purgar caché después del deploy ─────────────
 add_action('rest_api_init', function () {
     register_rest_route('ld/v1', '/purge-cache', [
