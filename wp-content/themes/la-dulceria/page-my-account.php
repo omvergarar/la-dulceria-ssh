@@ -249,7 +249,6 @@ get_header();
           </div>
           <?php endif; ?>
 
-          <?php do_action('woocommerce_register_form'); ?>
 
           <?php wp_nonce_field('woocommerce-register', 'woocommerce-register-nonce'); ?>
 
