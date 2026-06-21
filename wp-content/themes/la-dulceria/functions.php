@@ -197,3 +197,25 @@ add_filter('woocommerce_add_to_cart_fragments', function ($fragments) {
     $fragments['.ld-cart-count'] = '<span class="ld-cart-count">' . $count . '</span>';
     return $fragments;
 });
+
+// ── Endpoint para purgar caché después del deploy ─────────────
+add_action('rest_api_init', function () {
+    register_rest_route('ld/v1', '/purge-cache', [
+        'methods'             => 'GET',
+        'permission_callback' => '__return_true',
+        'callback'            => function (WP_REST_Request $req) {
+            $key = $req->get_param('key');
+            if ($key !== 'ld_purge_k9x2m4r8') {
+                return new WP_Error('forbidden', 'Clave incorrecta', ['status' => 403]);
+            }
+            // OPcache
+            if (function_exists('opcache_reset')) opcache_reset();
+            // Caché de objetos de WordPress
+            wp_cache_flush();
+            // Transients (caché de BD)
+            global $wpdb;
+            $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_%' OR option_name LIKE '_site_transient_%'");
+            return new WP_REST_Response(['ok' => true, 'mensaje' => 'Caché purgado correctamente'], 200);
+        },
+    ]);
+});
