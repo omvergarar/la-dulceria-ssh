@@ -1,6 +1,9 @@
 <?php
 defined('ABSPATH') || exit;
 
+// TEMPORAL: limpiar OPcache
+if (function_exists('opcache_reset')) { opcache_reset(); }
+
 // ── Soporte del tema ──────────────────────────────────────────
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
