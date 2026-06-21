@@ -1,5 +1,5 @@
 <?php defined('ABSPATH') || exit; ?>
-
+<p style="background:red;color:white;padding:10px;">PLANTILLA PERSONALIZADA CARGADA</p>
 <?php do_action('woocommerce_before_customer_login_form'); ?>
 
 <style>
