@@ -1,9 +1,6 @@
 <?php
 defined('ABSPATH') || exit;
 
-// TEMPORAL: limpiar OPcache
-if (function_exists('opcache_reset')) { opcache_reset(); }
-
 // ── Soporte del tema ──────────────────────────────────────────
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -200,14 +197,3 @@ add_filter('woocommerce_add_to_cart_fragments', function ($fragments) {
     $fragments['.ld-cart-count'] = '<span class="ld-cart-count">' . $count . '</span>';
     return $fragments;
 });
-
-// ── Forzar plantilla personalizada de login/registro ─────────
-add_filter('woocommerce_locate_template', function ($template, $template_name, $template_path) {
-    if ($template_name === 'myaccount/form-login.php') {
-        $custom = get_stylesheet_directory() . '/woocommerce/myaccount/form-login.php';
-        if (file_exists($custom)) {
-            return $custom;
-        }
-    }
-    return $template;
-}, 10, 3);

@@ -2,7 +2,6 @@
 defined('ABSPATH') || exit;
 get_header();
 ?>
-<p style="background:red;color:white;padding:10px;text-align:center;">PLANTILLA PAGE-MY-ACCOUNT CARGADA</p>
 
 <style>
 .ld-auth-wrap {
