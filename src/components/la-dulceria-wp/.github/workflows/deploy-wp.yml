@@ -1,0 +1,33 @@
+name: Deploy WordPress a Hostinger
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Subir cambios por FTP FTPS
+
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Subir archivos modificados via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          protocol: ftp
+          local-dir: ./wp-content/
+          server-dir: wp-content/
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/*.md

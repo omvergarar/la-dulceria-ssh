@@ -154,8 +154,8 @@ a { text-decoration: none; color: inherit; }
 /* === Carrusel de fotos === */
 .ld-carrusel { position: relative; overflow: hidden; max-height: 520px; }
 .ld-carrusel-slides { display: flex; transition: transform .5s ease; }
-.ld-carrusel-slide { flex-shrink: 0; width: 100%; }
-.ld-carrusel-slide img { width: 100%; height: 520px; object-fit: cover; }
+.ld-carrusel-slide { flex-shrink: 0; width: 100%; position: relative; }
+.ld-carrusel-slide img { width: 100%; height: 520px; object-fit: cover; display: block; }
 .ld-carrusel-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 32px; background: linear-gradient(transparent, rgba(45,26,43,.7)); color: #fff; }
 .ld-carrusel-caption h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 4px; }
 .ld-carrusel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,.8); border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 1.25rem; cursor: pointer; color: var(--accent); transition: var(--transition); display: flex; align-items: center; justify-content: center; }
@@ -330,3 +330,15 @@ a { text-decoration: none; color: inherit; }
 .woocommerce-message { background: #d1fae5; color: #065f46; border-left: 4px solid var(--green); }
 .woocommerce-error { background: #fee2e2; color: #991b1b; border-left: 4px solid var(--red); }
 .woocommerce-info { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
+/* force */
+/* v2 */
+/* v3 */
+/* v4 */
+/* v5 */
+/* v6 */
+/* v7 */
+/* v8 */
+/* deploy-test */
+/* v9 */
+/* v10 */
+/* updated */

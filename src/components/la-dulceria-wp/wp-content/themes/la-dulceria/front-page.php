@@ -40,7 +40,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
       <p style="font-size:.8rem;color:var(--text-medium);margin-top:4px;"><?= esc_html($descuento) ?>% de descuento en tu primera compra</p>
     </div>
     <div class="ld-modal-actions">
-      <a href="<?= wc_get_page_permalink('shop') ?>" class="btn-primary">Ver catálogo 🛍️</a>
+      <a href="<?= home_url('/tienda') ?>" class="btn-primary">Ver catálogo 🛍️</a>
       <a href="<?= wc_get_page_permalink('myaccount') ?>" class="btn-outline">Registrarme</a>
       <button id="ldModalCerrar" style="background:none;border:none;color:var(--text-light);font-size:.875rem;cursor:pointer;margin-top:4px;">Continuar sin registrarme</button>
     </div>
@@ -94,7 +94,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
       <p class="highlight">Bienvenidos a un lugar donde los detalles se convierten en recuerdos inolvidables.</p>
     </div>
     <div class="ld-hero-actions">
-      <a href="<?= wc_get_page_permalink('shop') ?>" class="btn-primary">Ver catálogo</a>
+      <a href="<?= home_url('/tienda') ?>" class="btn-primary">Ver catálogo</a>
       <a href="<?= esc_url(ld_whatsapp_url('Hola! Vi su catálogo en La Dulcería y quiero más información 🌸')) ?>"
          target="_blank" rel="noopener" class="btn-outline">Hablar por WhatsApp</a>
     </div>
@@ -143,7 +143,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
       <?php endwhile; wp_reset_postdata(); ?>
     </div>
     <div style="text-align:center;margin-top:40px;" class="fade-in">
-      <a href="<?= wc_get_page_permalink('shop') ?>" class="btn-primary">Ver catálogo completo →</a>
+      <a href="<?= home_url('/tienda') ?>" class="btn-primary">Ver catálogo completo →</a>
     </div>
   </div>
 </section>
@@ -227,7 +227,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
       <div id="ldContactoMsg" style="display:none;text-align:center;padding:32px;">
         <span style="font-size:3rem;display:block;margin-bottom:12px;">✅</span>
         <h4 style="font-family:'Playfair Display',serif;font-size:1.25rem;">¡Mensaje enviado!</h4>
-        <p style="color:var(--text-medium);margin-top:8px;">Te responderemos pronto.</p>
+        <p style="color:var(--text-medium);margin-top:8px;">Te responderemos pronto a través de <strong>administracion@ladulceriaregalos.com</strong></p>
       </div>
       <form id="ldContactoForm">
         <div class="ld-form-group">
