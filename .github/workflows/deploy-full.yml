@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: "1/3 — Subir tema la-dulceria"
+      - name: "1/3 — Subir tema la-dulceria (incluye woocommerce/)"
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
