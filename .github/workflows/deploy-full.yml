@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Eliminar historial de sincronización FTP
+      - name: Subir todos los archivos via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -30,12 +30,13 @@ jobs:
           local-dir: ./wp-content/
           server-dir: wp-content/
           dangerous-clean-slate: false
-          force-upload: true
+          state-name: .ftp-deploy-full-${{ github.run_id }}
+          timeout: 60000
+          log-level: minimal
           exclude: |
             **/.git*
             **/.git*/**
             **/*.md
-            **/.ftp-deploy-sync-state.json
 
       - name: Purgar caché del servidor
         run: |
