@@ -6,18 +6,29 @@ $cat_actual = isset($_GET['cat']) ? sanitize_text_field($_GET['cat']) : '';
 $busqueda   = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
 
 // Build query
+$paged  = max(1, get_query_var('paged'));
 $args = [
   'post_type'      => 'product',
+  'post_status'    => 'publish',
   'posts_per_page' => 20,
-  'paged'          => max(1, get_query_var('paged')),
+  'paged'          => $paged,
+  'tax_query'      => [
+    'relation' => 'AND',
+    [
+      'taxonomy' => 'product_visibility',
+      'field'    => 'name',
+      'terms'    => ['exclude-from-catalog'],
+      'operator' => 'NOT IN',
+    ],
+  ],
 ];
 if ($cat_actual) {
-  $args['tax_query'] = [['taxonomy'=>'product_cat','field'=>'slug','terms'=>$cat_actual]];
+  $args['tax_query'][] = ['taxonomy'=>'product_cat','field'=>'slug','terms'=>$cat_actual];
 }
 if ($busqueda) {
   $args['s'] = $busqueda;
 }
-$loop = new WP_Query($args);
+$loop  = new WP_Query($args);
 $total = $loop->found_posts;
 ?>
 
