@@ -1,0 +1,47 @@
+name: Despliegue Completo a Hostinger
+
+on:
+  workflow_dispatch:
+    inputs:
+      motivo:
+        description: "Motivo del despliegue completo (opcional)"
+        required: false
+        default: "Actualización manual completa"
+
+jobs:
+  deploy-completo:
+    runs-on: ubuntu-latest
+    name: Subir todos los archivos por FTP
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Eliminar historial de sincronización FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          protocol: ftp
+          local-dir: ./wp-content/
+          server-dir: wp-content/
+          dangerous-clean-slate: false
+          force-upload: true
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/*.md
+            **/.ftp-deploy-sync-state.json
+
+      - name: Purgar caché del servidor
+        run: |
+          sleep 15
+          curl -s "https://ladulceriaregalos.com/wp-json/ld/v1/purge-cache?key=ld_purge_k9x2m4r8"
+          echo "Caché purgado"
+
+      - name: Confirmar despliegue
+        run: echo "Despliegue completo finalizado - ${{ github.event.inputs.motivo }}"
