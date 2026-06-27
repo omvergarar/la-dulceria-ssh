@@ -1,4 +1,8 @@
-<?php get_header(); ?>
+<?php
+/**
+ * Template Name: Catálogo de productos
+ */
+get_header(); ?>
 <?php
 $categorias = get_terms(['taxonomy' => 'product_cat', 'hide_empty' => false,
     'exclude' => [get_option('default_product_cat')]]);
