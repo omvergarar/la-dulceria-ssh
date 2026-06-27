@@ -70,7 +70,10 @@
         <div style="margin-bottom:12px;">
           <label style="font-weight:600;font-size:.875rem;display:block;margin-bottom:6px;">Mensaje personalizado (opcional):</label>
           <textarea id="ldMensaje" class="form-input" style="resize:none;height:72px;"
-                    placeholder="Escribe tu mensaje especial..." maxlength="500"></textarea>
+                    placeholder="Escribe tu mensaje especial..." oninput="ldContarPalabras(this)"></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+            <span id="ldPalabrasRestantes" style="font-size:.75rem;color:var(--text-medium);">100 palabras disponibles</span>
+          </div>
         </div>
 
         <button class="btn-primary" style="width:100%;font-size:1rem;"
@@ -90,9 +93,36 @@
 </div>
 
 <script>
+const LD_MAX_PALABRAS = 100;
+
+function ldContarPalabras(textarea) {
+  const palabras = textarea.value.trim() === '' ? [] : textarea.value.trim().split(/\s+/);
+  const usadas   = palabras.length;
+  const restantes = LD_MAX_PALABRAS - usadas;
+  const el = document.getElementById('ldPalabrasRestantes');
+
+  if (restantes < 0) {
+    // Recortar al límite
+    textarea.value = palabras.slice(0, LD_MAX_PALABRAS).join(' ');
+    el.textContent = '0 palabras disponibles';
+    el.style.color = '#e53e3e';
+    return;
+  }
+
+  el.textContent = restantes + (restantes === 1 ? ' palabra disponible' : ' palabras disponibles');
+  el.style.color = restantes <= 10 ? '#e53e3e' : restantes <= 25 ? '#d97706' : 'var(--text-medium)';
+}
+
 function ldAgregarAlCarrito(productId) {
-  const qty  = parseInt(document.getElementById('ldQty').value) || 1;
-  const msg  = document.getElementById('ldMensaje')?.value || '';
+  const qty = parseInt(document.getElementById('ldQty').value) || 1;
+  const msg = document.getElementById('ldMensaje')?.value || '';
+
+  const palabras = msg.trim() === '' ? [] : msg.trim().split(/\s+/);
+  if (palabras.length > LD_MAX_PALABRAS) {
+    alert('El mensaje no puede superar las 100 palabras.');
+    return;
+  }
+
   fetch('<?= admin_url('admin-ajax.php') ?>', {
     method: 'POST',
     headers: {'Content-Type':'application/x-www-form-urlencoded'},
