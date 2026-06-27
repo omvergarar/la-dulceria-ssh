@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: "1/3 — Subir tema la-dulceria (incluye woocommerce/)"
+      - name: "1/3 — Subir tema la-dulceria"
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -32,6 +32,7 @@ jobs:
           dangerous-clean-slate: true
           timeout: 60000
           log-level: minimal
+          state-name: .ftp-state-tema-${{ github.run_id }}
           exclude: |
             **/.git*
             **/.git*/**
@@ -50,6 +51,7 @@ jobs:
           dangerous-clean-slate: true
           timeout: 60000
           log-level: minimal
+          state-name: .ftp-state-features-${{ github.run_id }}
           exclude: |
             **/.git*
             **/.git*/**
@@ -68,6 +70,7 @@ jobs:
           dangerous-clean-slate: true
           timeout: 60000
           log-level: minimal
+          state-name: .ftp-state-wompi-${{ github.run_id }}
           exclude: |
             **/.git*
             **/.git*/**
