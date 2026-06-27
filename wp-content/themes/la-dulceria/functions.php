@@ -6,6 +6,20 @@ add_filter('woocommerce_checkout_redirect_empty_cart', '__return_false');
 add_filter('woocommerce_login_url', function() { return home_url('/my-account/'); });
 remove_action('template_redirect', array('WC_Shortcode_My_Account', 'redirect_to_dashboard_if_logged_in'));
 
+// ── Deshabilitar modo Coming Soon de WooCommerce ──────────────
+add_action('init', function () {
+    if (get_option('woocommerce_coming_soon') === 'yes') {
+        update_option('woocommerce_coming_soon', 'no');
+    }
+});
+// Eliminar la redirección que WooCommerce aplica a visitantes no logueados
+add_action('template_redirect', function () {
+    if (class_exists('WC_Coming_Soon_Helper')) {
+        remove_action('template_redirect', ['WC_Coming_Soon_Helper', 'coming_soon_redirect'], 10);
+        remove_action('template_redirect', ['WC_Coming_Soon_Helper', 'redirect_coming_soon'], 10);
+    }
+}, 1);
+
 // ── Soporte del tema ──────────────────────────────────────────
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
