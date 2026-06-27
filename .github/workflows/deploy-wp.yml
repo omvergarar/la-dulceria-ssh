@@ -25,7 +25,7 @@ jobs:
           port: 21
           protocol: ftp
           local-dir: ./wp-content/
-          server-dir: wp-content/
+          server-dir: public_html/wp-content/
           dangerous-clean-slate: false
           exclude: |
             **/.git*
