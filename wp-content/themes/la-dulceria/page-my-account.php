@@ -275,7 +275,7 @@ else:
       <?php endif; ?>
     </a>
 
-    <a href="<?= wc_get_page_permalink('shop') ?>" class="ld-account-card">
+    <a href="<?= 'https://ladulceriaregalos.com/shop/' ?>" class="ld-account-card">
       <span class="ld-card-icon">🛍️</span>
       <h3>Ver catálogo</h3>
       <p>Descubre nuestros regalos especiales</p>

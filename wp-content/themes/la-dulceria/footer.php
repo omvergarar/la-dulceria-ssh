@@ -28,7 +28,7 @@
     <div>
       <h4>Navegación</h4>
       <a href="<?= home_url('/') ?>">Inicio</a>
-      <a href="<?= wc_get_page_permalink('shop') ?>">Catálogo</a>
+      <a href="<?= 'https://ladulceriaregalos.com/shop/' ?>">Catálogo</a>
       <a href="<?= home_url('/#resenas') ?>">Reseñas</a>
       <a href="<?= home_url('/#contacto') ?>">Contacto</a>
       <a href="<?= wc_get_page_permalink('myaccount') ?>">Regístrate</a>

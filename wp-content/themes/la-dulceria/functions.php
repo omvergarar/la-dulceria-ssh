@@ -1,6 +1,11 @@
 <?php
 defined('ABSPATH') || exit;
 
+// ── Catálogo visible para todos sin necesidad de login ────────
+add_filter('woocommerce_checkout_redirect_empty_cart', '__return_false');
+add_filter('woocommerce_login_url', function() { return home_url('/my-account/'); });
+remove_action('template_redirect', array('WC_Shortcode_My_Account', 'redirect_to_dashboard_if_logged_in'));
+
 // ── Soporte del tema ──────────────────────────────────────────
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');

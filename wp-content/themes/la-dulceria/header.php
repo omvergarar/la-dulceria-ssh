@@ -28,7 +28,7 @@ $is_admin   = current_user_can('manage_options') || current_user_can('administra
     <!-- Links desktop -->
     <div class="ld-navbar-links">
       <a href="<?= home_url('/') ?>">Inicio</a>
-      <a href="<?= wc_get_page_permalink('shop') ?>">Catálogo</a>
+      <a href="<?= 'https://ladulceriaregalos.com/shop/' ?>">Catálogo</a>
       <a href="<?= home_url('/#resenas') ?>">Reseñas</a>
       <a href="<?= home_url('/#contacto') ?>">Contacto</a>
     </div>
@@ -68,7 +68,7 @@ $is_admin   = current_user_can('manage_options') || current_user_can('administra
   <button class="ld-mobile-close" id="ldMobileClose">✕</button>
   <img src="<?= get_template_directory_uri() ?>/assets/images/logo.png" alt="La Dulcería" width="80" height="80" style="border-radius:50%;">
   <a href="<?= home_url('/') ?>">Inicio</a>
-  <a href="<?= wc_get_page_permalink('shop') ?>">Catálogo</a>
+  <a href="<?= 'https://ladulceriaregalos.com/shop/' ?>">Catálogo</a>
   <a href="<?= home_url('/#resenas') ?>">Reseñas</a>
   <a href="<?= home_url('/#contacto') ?>">Contacto</a>
   <a href="<?= wc_get_cart_url() ?>">Carrito 🛒</a>
