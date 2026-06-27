@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: "1/3 — Subir tema la-dulceria"
+      - name: "1/5 — Subir tema la-dulceria"
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -38,7 +38,26 @@ jobs:
             **/.git*/**
             **/*.md
 
-      - name: "2/3 — Subir plugin dulceria-features"
+      - name: "2/5 — Subir templates WooCommerce del tema"
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          protocol: ftp
+          local-dir: ./wp-content/themes/la-dulceria/woocommerce/
+          server-dir: wp-content/themes/la-dulceria/woocommerce/
+          dangerous-clean-slate: true
+          timeout: 60000
+          log-level: minimal
+          state-name: .ftp-state-woo-${{ github.run_id }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/*.md
+
+      - name: "3/5 — Subir plugin dulceria-features"
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -57,7 +76,7 @@ jobs:
             **/.git*/**
             **/*.md
 
-      - name: "3/3 — Subir plugin dulceria-wompi"
+      - name: "4/5 — Subir plugin dulceria-wompi"
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -76,7 +95,7 @@ jobs:
             **/.git*/**
             **/*.md
 
-      - name: Purgar caché del servidor
+      - name: "5/5 — Purgar caché del servidor"
         run: |
           sleep 15
           curl -s "https://ladulceriaregalos.com/wp-json/ld/v1/purge-cache?key=ld_purge_k9x2m4r8"
