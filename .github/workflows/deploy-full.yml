@@ -38,6 +38,9 @@ jobs:
             **/.git*/**
             **/*.md
 
+      - name: Pausa entre conexiones FTP
+        run: sleep 30
+
       - name: "2/5 — Subir templates WooCommerce del tema"
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -57,6 +60,9 @@ jobs:
             **/.git*/**
             **/*.md
 
+      - name: Pausa entre conexiones FTP
+        run: sleep 30
+
       - name: "3/5 — Subir plugin dulceria-features"
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -75,6 +81,9 @@ jobs:
             **/.git*
             **/.git*/**
             **/*.md
+
+      - name: Pausa entre conexiones FTP
+        run: sleep 30
 
       - name: "4/5 — Subir plugin dulceria-wompi"
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -97,7 +106,7 @@ jobs:
 
       - name: "5/5 — Purgar caché del servidor"
         run: |
-          sleep 15
+          sleep 30
           curl -s "https://ladulceriaregalos.com/wp-json/ld/v1/purge-cache?key=ld_purge_k9x2m4r8"
           echo "Caché purgado"
 
