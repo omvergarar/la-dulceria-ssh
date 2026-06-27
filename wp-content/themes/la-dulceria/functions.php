@@ -1,6 +1,24 @@
 <?php
 defined('ABSPATH') || exit;
 
+// ── Forzar template page-my-account.php en la página de WooCommerce ──
+add_filter('template_include', function ($template) {
+    if (is_account_page() && !is_wc_endpoint_url()) {
+        $custom = get_template_directory() . '/page-my-account.php';
+        if (file_exists($custom)) return $custom;
+    }
+    return $template;
+});
+
+// ── Desactivar caché en páginas de cuenta ────────────────────
+add_action('send_headers', function () {
+    if (is_page('my-account') || is_account_page()) {
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('X-LiteSpeed-Cache-Control: no-cache');
+    }
+});
+
 // ── Catálogo visible para todos sin necesidad de login ────────
 add_filter('woocommerce_checkout_redirect_empty_cart', '__return_false');
 add_filter('woocommerce_login_url', function() { return home_url('/my-account/'); });
@@ -48,9 +66,9 @@ add_action('woocommerce_created_customer', function ($customer_id) {
     }
 });
 
-// Redirigir al completar perfil después del registro
+// Redirigir al inicio después del registro
 add_filter('woocommerce_registration_redirect', function () {
-    return wc_get_account_endpoint_url('edit-account');
+    return home_url('/');
 });
 
 // ── Soporte del tema ──────────────────────────────────────────
