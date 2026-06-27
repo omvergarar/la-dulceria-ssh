@@ -20,6 +20,39 @@ add_action('template_redirect', function () {
     }
 }, 1);
 
+// ── Registro: guardar contraseña y nombre en BD ───────────────
+// Forzar que WooCommerce use la contraseña ingresada por el usuario
+add_filter('woocommerce_new_customer_data', function ($data) {
+    if (!empty($_POST['password'])) {
+        $data['user_pass'] = $_POST['password'];
+    }
+    if (!empty($_POST['first_name'])) {
+        $data['first_name'] = sanitize_text_field(wp_unslash($_POST['first_name']));
+        $data['display_name'] = $data['first_name'];
+    }
+    if (!empty($_POST['last_name'])) {
+        $data['last_name'] = sanitize_text_field(wp_unslash($_POST['last_name']));
+    }
+    return $data;
+});
+
+// Guardar nombre/apellido en user_meta después de crear el usuario
+add_action('woocommerce_created_customer', function ($customer_id) {
+    if (!empty($_POST['first_name'])) {
+        update_user_meta($customer_id, 'first_name', sanitize_text_field(wp_unslash($_POST['first_name'])));
+        update_user_meta($customer_id, 'billing_first_name', sanitize_text_field(wp_unslash($_POST['first_name'])));
+    }
+    if (!empty($_POST['last_name'])) {
+        update_user_meta($customer_id, 'last_name', sanitize_text_field(wp_unslash($_POST['last_name'])));
+        update_user_meta($customer_id, 'billing_last_name', sanitize_text_field(wp_unslash($_POST['last_name'])));
+    }
+});
+
+// Redirigir al completar perfil después del registro
+add_filter('woocommerce_registration_redirect', function () {
+    return wc_get_account_endpoint_url('edit-account');
+});
+
 // ── Soporte del tema ──────────────────────────────────────────
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');

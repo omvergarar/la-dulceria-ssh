@@ -366,20 +366,27 @@ else:
 
       <!-- PANEL REGISTRARSE -->
       <div id="ld-panel-registro" class="ld-auth-panel">
-        <form method="post" class="woocommerce-form woocommerce-form-register">
+        <form method="post" class="woocommerce-form woocommerce-form-register" id="ldRegForm" onsubmit="return ldValidarRegistro()">
           <?php do_action('woocommerce_register_form_start'); ?>
 
-          <?php if ('no' === get_option('woocommerce_registration_generate_username')): ?>
-          <div class="ld-fg">
-            <label for="reg_username">Nombre de usuario</label>
-            <input type="text" id="reg_username" name="username"
-                   placeholder="tunombre"
-                   value="<?= esc_attr(isset($_POST['username']) ? wp_unslash($_POST['username']) : '') ?>"
-                   autocomplete="username" required>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="ld-fg" style="margin-bottom:0;">
+              <label for="reg_first_name">Nombre</label>
+              <input type="text" id="reg_first_name" name="first_name"
+                     placeholder="Tu nombre"
+                     value="<?= esc_attr(isset($_POST['first_name']) ? wp_unslash($_POST['first_name']) : '') ?>"
+                     autocomplete="given-name" required>
+            </div>
+            <div class="ld-fg" style="margin-bottom:0;">
+              <label for="reg_last_name">Apellido</label>
+              <input type="text" id="reg_last_name" name="last_name"
+                     placeholder="Tu apellido"
+                     value="<?= esc_attr(isset($_POST['last_name']) ? wp_unslash($_POST['last_name']) : '') ?>"
+                     autocomplete="family-name">
+            </div>
           </div>
-          <?php endif; ?>
 
-          <div class="ld-fg">
+          <div class="ld-fg" style="margin-top:14px;">
             <label for="reg_email">Correo electrónico</label>
             <input type="email" id="reg_email" name="email"
                    placeholder="tucorreo@email.com"
@@ -387,17 +394,41 @@ else:
                    autocomplete="email" required>
           </div>
 
-          <?php if ('no' === get_option('woocommerce_registration_generate_password')): ?>
           <div class="ld-fg">
             <label for="reg_password">Contraseña</label>
-            <input type="password" id="reg_password" name="password"
-                   placeholder="Mínimo 8 caracteres"
-                   autocomplete="new-password" required>
+            <div style="position:relative;">
+              <input type="password" id="reg_password" name="password"
+                     placeholder="Mínimo 8 caracteres"
+                     autocomplete="new-password"
+                     oninput="ldPasswordFortaleza(this.value)"
+                     required>
+              <button type="button" onclick="ldVerPassword('reg_password',this)"
+                      style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;color:#9a7898;">👁</button>
+            </div>
+            <div id="ldFortaleza" style="margin-top:6px;display:none;">
+              <div style="height:4px;border-radius:4px;background:#ecd6ec;overflow:hidden;">
+                <div id="ldFortalezaBar" style="height:100%;width:0;border-radius:4px;transition:width .3s,background .3s;"></div>
+              </div>
+              <p id="ldFortalezaTxt" style="font-size:.7rem;margin:4px 0 0;color:#9a7898;"></p>
+            </div>
           </div>
-          <?php endif; ?>
 
+          <div class="ld-fg">
+            <label for="reg_password2">Confirmar contraseña</label>
+            <div style="position:relative;">
+              <input type="password" id="reg_password2" name="password2"
+                     placeholder="Repite tu contraseña"
+                     autocomplete="new-password"
+                     oninput="ldCheckMatch()"
+                     required>
+              <button type="button" onclick="ldVerPassword('reg_password2',this)"
+                      style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;color:#9a7898;">👁</button>
+            </div>
+            <p id="ldMatchMsg" style="font-size:.7rem;margin:4px 0 0;display:none;"></p>
+          </div>
 
           <?php wp_nonce_field('woocommerce-register', 'woocommerce-register-nonce'); ?>
+          <input type="hidden" name="redirect" value="<?= esc_url(wc_get_account_endpoint_url('edit-account')) ?>">
 
           <button type="submit" name="register" value="Registrarse" class="ld-auth-btn">
             Crear mi cuenta 🌸
@@ -425,6 +456,69 @@ function ldTab(panel, btn) {
   btn.classList.add('active');
   document.getElementById('ld-panel-' + panel).classList.add('active');
 }
+
+function ldVerPassword(id, btn) {
+  const input = document.getElementById(id);
+  const mostrar = input.type === 'password';
+  input.type = mostrar ? 'text' : 'password';
+  btn.textContent = mostrar ? '🙈' : '👁';
+}
+
+function ldPasswordFortaleza(val) {
+  const bar = document.getElementById('ldFortalezaBar');
+  const txt = document.getElementById('ldFortalezaTxt');
+  const wrap = document.getElementById('ldFortaleza');
+  if (!val) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+
+  let score = 0;
+  if (val.length >= 8)  score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+
+  const niveles = [
+    { w: '25%',  bg: '#e53e3e', label: 'Muy débil' },
+    { w: '50%',  bg: '#d97706', label: 'Débil' },
+    { w: '75%',  bg: '#2563eb', label: 'Buena' },
+    { w: '100%', bg: '#16a34a', label: 'Fuerte 💪' },
+  ];
+  const n = niveles[score - 1] || niveles[0];
+  bar.style.width = n.w;
+  bar.style.background = n.bg;
+  txt.textContent = n.label;
+  txt.style.color = n.bg;
+}
+
+function ldCheckMatch() {
+  const p1 = document.getElementById('reg_password').value;
+  const p2 = document.getElementById('reg_password2').value;
+  const msg = document.getElementById('ldMatchMsg');
+  if (!p2) { msg.style.display = 'none'; return; }
+  msg.style.display = 'block';
+  if (p1 === p2) {
+    msg.textContent = '✅ Las contraseñas coinciden';
+    msg.style.color = '#16a34a';
+  } else {
+    msg.textContent = '❌ Las contraseñas no coinciden';
+    msg.style.color = '#e53e3e';
+  }
+}
+
+function ldValidarRegistro() {
+  const p1 = document.getElementById('reg_password').value;
+  const p2 = document.getElementById('reg_password2').value;
+  if (p1.length < 8) {
+    alert('La contraseña debe tener al menos 8 caracteres.');
+    return false;
+  }
+  if (p1 !== p2) {
+    alert('Las contraseñas no coinciden.');
+    return false;
+  }
+  return true;
+}
+
 <?php if (!empty($_GET['register'])): ?>
 document.addEventListener('DOMContentLoaded', function() {
   ldTab('registro', document.querySelectorAll('.ld-auth-tab')[1]);
