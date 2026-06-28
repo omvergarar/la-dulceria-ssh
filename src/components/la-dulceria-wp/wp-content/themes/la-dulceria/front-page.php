@@ -40,8 +40,8 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
       <p style="font-size:.8rem;color:var(--text-medium);margin-top:4px;"><?= esc_html($descuento) ?>% de descuento en tu primera compra</p>
     </div>
     <div class="ld-modal-actions">
-      <a href="<?= home_url('/tienda') ?>" class="btn-primary">Ver catálogo 🛍️</a>
-      <a href="<?= wc_get_page_permalink('myaccount') ?>" class="btn-outline">Registrarme</a>
+      <a href="<?= 'https://ladulceriaregalos.com/shop/' ?>" class="btn-primary">Ver catálogo 🛍️</a>
+      <a href="<?= esc_url(add_query_arg('register', '1', wc_get_page_permalink('myaccount'))) ?>" class="btn-outline">Registrarme</a>
       <button id="ldModalCerrar" style="background:none;border:none;color:var(--text-light);font-size:.875rem;cursor:pointer;margin-top:4px;">Continuar sin registrarme</button>
     </div>
   </div>
@@ -86,7 +86,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
 
   <div class="ld-hero-content">
     <span class="ld-hero-badge">✨ Regalos únicos en Colombia</span>
-    <h1>El regalo perfecto<br>nace en <em>La Dulcería tienda de regalos</em></h1>
+    <h1>El regalo perfecto nace en <em>La Dulcería tienda de regalos</em></h1>
     <div class="ld-hero-desc">
       <p style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:600;color:var(--text-dark);">Más que regalos, creamos emociones que perduran.</p>
       <p>Lo que comenzó como un sueño lleno de ilusión, hoy se ha convertido en un espacio donde cada detalle cuenta una historia.</p>
@@ -94,7 +94,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
       <p class="highlight">Bienvenidos a un lugar donde los detalles se convierten en recuerdos inolvidables.</p>
     </div>
     <div class="ld-hero-actions">
-      <a href="<?= home_url('/tienda') ?>" class="btn-primary">Ver catálogo</a>
+      <a href="<?= 'https://ladulceriaregalos.com/shop/' ?>" class="btn-primary">Ver catálogo</a>
       <a href="<?= esc_url(ld_whatsapp_url('Hola! Vi su catálogo en La Dulcería y quiero más información 🌸')) ?>"
          target="_blank" rel="noopener" class="btn-outline">Hablar por WhatsApp</a>
     </div>
@@ -143,7 +143,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
       <?php endwhile; wp_reset_postdata(); ?>
     </div>
     <div style="text-align:center;margin-top:40px;" class="fade-in">
-      <a href="<?= home_url('/tienda') ?>" class="btn-primary">Ver catálogo completo →</a>
+      <a href="<?= 'https://ladulceriaregalos.com/shop/' ?>" class="btn-primary">Ver catálogo completo →</a>
     </div>
   </div>
 </section>
@@ -266,7 +266,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
   <div style="max-width:380px;margin:0 auto;text-align:center;" class="fade-in">
     <h2 style="font-family:'Playfair Display',serif;font-size:1.875rem;color:var(--text-dark);margin-bottom:12px;">¿Quieres recibir ofertas exclusivas? 🌸</h2>
     <p style="color:var(--text-medium);margin-bottom:32px;">Regístrate y recibe tu código de descuento especial</p>
-    <a href="<?= wc_get_page_permalink('myaccount') ?>" class="btn-primary"
+    <a href="<?= esc_url(add_query_arg('register', '1', wc_get_page_permalink('myaccount'))) ?>" class="btn-primary"
        style="font-size:1.1rem;padding:16px 40px;">Registrarme</a>
   </div>
 </section>

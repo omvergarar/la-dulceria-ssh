@@ -25,9 +25,14 @@ jobs:
           port: 21
           protocol: ftp
           local-dir: ./wp-content/
-          server-dir: wp-content/
+          server-dir: domains/ladulceriaregalos.com/public_html/wp-content/
           dangerous-clean-slate: false
           exclude: |
             **/.git*
             **/.git*/**
             **/*.md
+
+      - name: Purgar caché del servidor
+        run: |
+          sleep 10
+          curl -s "https://ladulceriaregalos.com/wp-json/ld/v1/purge-cache?key=ld_purge_k9x2m4r8"

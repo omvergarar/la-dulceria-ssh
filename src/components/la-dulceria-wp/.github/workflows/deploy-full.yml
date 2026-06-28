@@ -1,0 +1,114 @@
+name: Despliegue Completo a Hostinger
+
+on:
+  workflow_dispatch:
+    inputs:
+      motivo:
+        description: "Motivo del despliegue completo (opcional)"
+        required: false
+        default: "Actualización manual completa"
+
+jobs:
+  deploy-completo:
+    runs-on: ubuntu-latest
+    name: Subir todos los archivos por FTP
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "1/5 — Subir tema la-dulceria"
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          protocol: ftp
+          local-dir: ./wp-content/themes/la-dulceria/
+          server-dir: domains/ladulceriaregalos.com/public_html/wp-content/themes/la-dulceria/
+          dangerous-clean-slate: true
+          timeout: 60000
+          log-level: minimal
+          state-name: .ftp-state-tema-${{ github.run_id }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/*.md
+
+      - name: Pausa entre conexiones FTP
+        run: sleep 30
+
+      - name: "2/5 — Subir templates WooCommerce del tema"
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          protocol: ftp
+          local-dir: ./wp-content/themes/la-dulceria/woocommerce/
+          server-dir: domains/ladulceriaregalos.com/public_html/wp-content/themes/la-dulceria/woocommerce/
+          dangerous-clean-slate: true
+          timeout: 60000
+          log-level: minimal
+          state-name: .ftp-state-woo-${{ github.run_id }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/*.md
+
+      - name: Pausa entre conexiones FTP
+        run: sleep 30
+
+      - name: "3/5 — Subir plugin dulceria-features"
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          protocol: ftp
+          local-dir: ./wp-content/plugins/dulceria-features/
+          server-dir: domains/ladulceriaregalos.com/public_html/wp-content/plugins/dulceria-features/
+          dangerous-clean-slate: true
+          timeout: 60000
+          log-level: minimal
+          state-name: .ftp-state-features-${{ github.run_id }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/*.md
+
+      - name: Pausa entre conexiones FTP
+        run: sleep 30
+
+      - name: "4/5 — Subir plugin dulceria-wompi"
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          protocol: ftp
+          local-dir: ./wp-content/plugins/dulceria-wompi/
+          server-dir: domains/ladulceriaregalos.com/public_html/wp-content/plugins/dulceria-wompi/
+          dangerous-clean-slate: true
+          timeout: 60000
+          log-level: minimal
+          state-name: .ftp-state-wompi-${{ github.run_id }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/*.md
+
+      - name: "5/5 — Purgar caché del servidor"
+        run: |
+          sleep 30
+          curl -s "https://ladulceriaregalos.com/wp-json/ld/v1/purge-cache?key=ld_purge_k9x2m4r8"
+          echo "Caché purgado"
+
+      - name: Confirmar despliegue
+        run: echo "✅ Despliegue completo finalizado - ${{ github.event.inputs.motivo }}"

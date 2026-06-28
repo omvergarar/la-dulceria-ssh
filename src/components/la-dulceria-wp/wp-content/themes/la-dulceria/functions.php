@@ -1,6 +1,91 @@
 <?php
 defined('ABSPATH') || exit;
 
+// Reset OPcache al cargar el tema (temporal hasta confirmar deploy estable)
+if (function_exists('opcache_reset')) { opcache_reset(); }
+
+// ── Forzar template page-my-account.php en la página de WooCommerce ──
+add_filter('template_include', function ($template) {
+    if (is_account_page() && !is_wc_endpoint_url()) {
+        $custom = get_template_directory() . '/page-my-account.php';
+        if (file_exists($custom)) return $custom;
+    }
+    return $template;
+});
+
+// ── Desactivar caché en páginas de cuenta ────────────────────
+add_action('send_headers', function () {
+    if (is_page('my-account') || is_account_page()) {
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('X-LiteSpeed-Cache-Control: no-cache');
+    }
+});
+
+// ── Catálogo visible para todos sin necesidad de login ────────
+add_filter('woocommerce_checkout_redirect_empty_cart', '__return_false');
+add_filter('woocommerce_login_url', function() { return home_url('/my-account/'); });
+remove_action('template_redirect', array('WC_Shortcode_My_Account', 'redirect_to_dashboard_if_logged_in'));
+
+// ── Deshabilitar modo Coming Soon de WooCommerce ──────────────
+add_action('init', function () {
+    if (get_option('woocommerce_coming_soon') === 'yes') {
+        update_option('woocommerce_coming_soon', 'no');
+    }
+});
+// Eliminar la redirección que WooCommerce aplica a visitantes no logueados
+add_action('template_redirect', function () {
+    if (class_exists('WC_Coming_Soon_Helper')) {
+        remove_action('template_redirect', ['WC_Coming_Soon_Helper', 'coming_soon_redirect'], 10);
+        remove_action('template_redirect', ['WC_Coming_Soon_Helper', 'redirect_coming_soon'], 10);
+    }
+}, 1);
+
+// ── Registro: guardar contraseña y nombre en BD ───────────────
+// Forzar opción via filtro directo (más confiable que update_option)
+add_filter('pre_option_woocommerce_registration_generate_password', function() { return 'no'; });
+update_option('woocommerce_registration_generate_password', 'no');
+
+// Garantizar que la contraseña del POST se use siempre  
+add_filter('woocommerce_new_customer_data', function ($data) {
+    if (!empty($_POST['password'])) {
+        $data['user_pass'] = $_POST['password'];
+    }
+    if (!empty($_POST['first_name'])) {
+        $data['first_name'] = sanitize_text_field(wp_unslash($_POST['first_name']));
+        $data['display_name'] = $data['first_name'];
+    }
+    if (!empty($_POST['last_name'])) {
+        $data['last_name'] = sanitize_text_field(wp_unslash($_POST['last_name']));
+    }
+    return $data;
+});
+
+// Guardar nombre/apellido en user_meta después de crear el usuario
+add_action('woocommerce_created_customer', function ($customer_id) {
+    if (!empty($_POST['first_name'])) {
+        update_user_meta($customer_id, 'first_name', sanitize_text_field(wp_unslash($_POST['first_name'])));
+        update_user_meta($customer_id, 'billing_first_name', sanitize_text_field(wp_unslash($_POST['first_name'])));
+    }
+    if (!empty($_POST['last_name'])) {
+        update_user_meta($customer_id, 'last_name', sanitize_text_field(wp_unslash($_POST['last_name'])));
+        update_user_meta($customer_id, 'billing_last_name', sanitize_text_field(wp_unslash($_POST['last_name'])));
+    }
+});
+
+// Redirigir al inicio después del registro
+add_filter('woocommerce_registration_redirect', function () {
+    return home_url('/');
+});
+
+// Redirigir al inicio en el auto-login post-registro
+add_filter('woocommerce_login_redirect', function ($redirect, $user) {
+    if (!empty($_POST['register'])) {
+        return home_url('/');
+    }
+    return $redirect;
+}, 10, 2);
+
 // ── Soporte del tema ──────────────────────────────────────────
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -196,4 +281,27 @@ add_filter('woocommerce_add_to_cart_fragments', function ($fragments) {
     $count = WC()->cart->get_cart_contents_count();
     $fragments['.ld-cart-count'] = '<span class="ld-cart-count">' . $count . '</span>';
     return $fragments;
+});
+
+
+// ── Endpoint para purgar caché después del deploy ─────────────
+add_action('rest_api_init', function () {
+    register_rest_route('ld/v1', '/purge-cache', [
+        'methods'             => 'GET',
+        'permission_callback' => '__return_true',
+        'callback'            => function (WP_REST_Request $req) {
+            $key = $req->get_param('key');
+            if ($key !== 'ld_purge_k9x2m4r8') {
+                return new WP_Error('forbidden', 'Clave incorrecta', ['status' => 403]);
+            }
+            // OPcache
+            if (function_exists('opcache_reset')) opcache_reset();
+            // Caché de objetos de WordPress
+            wp_cache_flush();
+            // Transients (caché de BD)
+            global $wpdb;
+            $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_%' OR option_name LIKE '_site_transient_%'");
+            return new WP_REST_Response(['ok' => true, 'mensaje' => 'Caché purgado correctamente'], 200);
+        },
+    ]);
 });

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registro — La Dulcería (preview)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Lato', sans-serif; background: linear-gradient(135deg, #fdf0fd 0%, #fce4fc 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 16px; }
+
+    .ld-auth-card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 40px rgba(201,107,196,.15);
+      width: 100%;
+      max-width: 440px;
+      overflow: hidden;
+    }
+    .ld-auth-logo {
+      text-align: center;
+      padding: 36px 32px 0;
+    }
+    .ld-auth-logo .logo-circle {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg,#f5bef2,#c96bc4);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 4px 16px rgba(201,107,196,.25);
+      margin-bottom: 10px;
+    }
+    .ld-auth-logo p { font-size: .8125rem; color: #9a7898; margin-top: 6px; }
+
+    .ld-auth-tabs {
+      display: flex;
+      margin: 24px 32px 0;
+      background: #fdf0fd;
+      border-radius: 50px;
+      padding: 4px;
+    }
+    .ld-auth-tab {
+      flex: 1; text-align: center; padding: 9px 0;
+      font-size: .875rem; font-weight: 700;
+      border-radius: 50px; cursor: pointer;
+      color: #9a7898; transition: all .2s;
+      border: none; background: transparent;
+    }
+    .ld-auth-tab.active {
+      background: #fff; color: #c96bc4;
+      box-shadow: 0 2px 8px rgba(201,107,196,.2);
+    }
+
+    .ld-auth-body { padding: 28px 32px 36px; }
+    .ld-auth-panel { display: none; }
+    .ld-auth-panel.active { display: block; }
+
+    .ld-fg { margin-bottom: 16px; }
+    .ld-fg label {
+      display: block; font-size: .8125rem; font-weight: 600;
+      color: #5a3d58; margin-bottom: 6px;
+    }
+    .ld-fg input {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid #ecd6ec; border-radius: 10px;
+      font-size: .9375rem; color: #2d1a2b;
+      background: #fdf8fd; transition: border-color .2s; outline: none;
+      font-family: inherit;
+    }
+    .ld-fg input:focus { border-color: #c96bc4; background: #fff; }
+
+    .ld-auth-btn {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, #c96bc4 0%, #a855a8 100%);
+      color: #fff; border: none; border-radius: 50px;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      letter-spacing: .3px; transition: opacity .2s, transform .1s;
+      margin-top: 4px; font-family: inherit;
+    }
+    .ld-auth-btn:hover { opacity: .9; transform: translateY(-1px); }
+    .ld-auth-btn.outline {
+      background: linear-gradient(135deg,#fbddf9 0%,#f5bef2 100%);
+      color: #c96bc4; margin-top: 12px;
+    }
+
+    .ld-lost-pw { text-align: right; margin-top: -8px; margin-bottom: 16px; }
+    .ld-lost-pw a { font-size: .75rem; color: #c96bc4; text-decoration: none; }
+    .ld-lost-pw a:hover { text-decoration: underline; }
+
+    .ld-divider {
+      display: flex; align-items: center; gap: 10px;
+      margin: 18px 0; color: #c5b0c4; font-size: .75rem;
+    }
+    .ld-divider::before, .ld-divider::after {
+      content: ''; flex: 1; height: 1px; background: #ecd6ec;
+    }
+
+    .ld-policy {
+      font-size: .7rem; color: #9a7898;
+      line-height: 1.6; margin-top: 14px; text-align: center;
+    }
+    .ld-policy a { color: #c96bc4; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .input-wrap { position: relative; }
+    .input-wrap input { padding-right: 40px; }
+    .eye-btn {
+      position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      font-size: 1rem; color: #9a7898; padding: 0;
+    }
+
+    .strength-bar-wrap { margin-top: 6px; }
+    .strength-bar-bg { height: 4px; border-radius: 4px; background: #ecd6ec; overflow: hidden; }
+    .strength-bar { height: 100%; width: 0; border-radius: 4px; transition: width .3s, background .3s; }
+    .strength-label { font-size: .7rem; margin-top: 4px; color: #9a7898; }
+
+    .match-msg { font-size: .7rem; margin-top: 4px; display: none; }
+  </style>
+</head>
+<body>
+
+<div class="ld-auth-card">
+
+  <div class="ld-auth-logo">
+    <div class="logo-circle">🌸</div>
+    <p>Regalos únicos y personalizados</p>
+  </div>
+
+  <div class="ld-auth-tabs">
+    <button class="ld-auth-tab" onclick="ldTab('login',this)">Ingresar</button>
+    <button class="ld-auth-tab active" onclick="ldTab('registro',this)">Registrarse</button>
+  </div>
+
+  <div class="ld-auth-body">
+
+    <!-- PANEL LOGIN -->
+    <div id="ld-panel-login" class="ld-auth-panel">
+      <div class="ld-fg">
+        <label>Correo electrónico</label>
+        <input type="email" placeholder="tucorreo@email.com">
+      </div>
+      <div class="ld-fg">
+        <label>Contraseña</label>
+        <div class="input-wrap">
+          <input type="password" id="login_pw" placeholder="••••••••">
+          <button class="eye-btn" type="button" onclick="ldVerPassword('login_pw',this)">👁</button>
+        </div>
+      </div>
+      <div class="ld-lost-pw"><a href="#">¿Olvidaste tu contraseña?</a></div>
+      <button class="ld-auth-btn">Ingresar a mi cuenta</button>
+      <div class="ld-divider">o</div>
+      <button class="ld-auth-btn outline" onclick="ldTab('registro', document.querySelectorAll('.ld-auth-tab')[1])">
+        Crear una cuenta nueva
+      </button>
+    </div>
+
+    <!-- PANEL REGISTRO -->
+    <div id="ld-panel-registro" class="ld-auth-panel active">
+
+      <div class="two-col">
+        <div class="ld-fg" style="margin-bottom:0;">
+          <label>Nombre</label>
+          <input type="text" placeholder="Tu nombre">
+        </div>
+        <div class="ld-fg" style="margin-bottom:0;">
+          <label>Apellido</label>
+          <input type="text" placeholder="Tu apellido">
+        </div>
+      </div>
+
+      <div class="ld-fg" style="margin-top:16px;">
+        <label>Correo electrónico</label>
+        <input type="email" placeholder="tucorreo@email.com">
+      </div>
+
+      <div class="ld-fg">
+        <label>Contraseña</label>
+        <div class="input-wrap">
+          <input type="password" id="reg_password" placeholder="Mínimo 8 caracteres"
+                 oninput="ldPasswordFortaleza(this.value)">
+          <button class="eye-btn" type="button" onclick="ldVerPassword('reg_password',this)">👁</button>
+        </div>
+        <div class="strength-bar-wrap" id="ldFortaleza" style="display:none;">
+          <div class="strength-bar-bg"><div class="strength-bar" id="ldFortalezaBar"></div></div>
+          <p class="strength-label" id="ldFortalezaTxt"></p>
+        </div>
+      </div>
+
+      <div class="ld-fg">
+        <label>Confirmar contraseña</label>
+        <div class="input-wrap">
+          <input type="password" id="reg_password2" placeholder="Repite tu contraseña"
+                 oninput="ldCheckMatch()">
+          <button class="eye-btn" type="button" onclick="ldVerPassword('reg_password2',this)">👁</button>
+        </div>
+        <p class="match-msg" id="ldMatchMsg"></p>
+      </div>
+
+      <button class="ld-auth-btn" onclick="ldValidarRegistro()">Crear mi cuenta 🌸</button>
+
+      <p class="ld-policy">
+        Al registrarte aceptas nuestros
+        <a href="#">Términos y condiciones</a>
+        y autorizas el tratamiento de tus datos conforme a la
+        <strong>Ley 1581 de 2012</strong> (Colombia).
+      </p>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+function ldTab(panel, btn) {
+  document.querySelectorAll('.ld-auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ld-auth-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('ld-panel-' + panel).classList.add('active');
+}
+
+function ldVerPassword(id, btn) {
+  const input = document.getElementById(id);
+  const mostrar = input.type === 'password';
+  input.type = mostrar ? 'text' : 'password';
+  btn.textContent = mostrar ? '🙈' : '👁';
+}
+
+function ldPasswordFortaleza(val) {
+  const bar = document.getElementById('ldFortalezaBar');
+  const txt = document.getElementById('ldFortalezaTxt');
+  const wrap = document.getElementById('ldFortaleza');
+  if (!val) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  let score = 0;
+  if (val.length >= 8)        score++;
+  if (/[A-Z]/.test(val))      score++;
+  if (/[0-9]/.test(val))      score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+  const niveles = [
+    { w:'25%',  bg:'#e53e3e', label:'Muy débil' },
+    { w:'50%',  bg:'#d97706', label:'Débil' },
+    { w:'75%',  bg:'#2563eb', label:'Buena' },
+    { w:'100%', bg:'#16a34a', label:'Fuerte 💪' },
+  ];
+  const n = niveles[Math.max(score - 1, 0)];
+  bar.style.width = n.w;
+  bar.style.background = n.bg;
+  txt.textContent = n.label;
+  txt.style.color = n.bg;
+}
+
+function ldCheckMatch() {
+  const p1  = document.getElementById('reg_password').value;
+  const p2  = document.getElementById('reg_password2').value;
+  const msg = document.getElementById('ldMatchMsg');
+  if (!p2) { msg.style.display = 'none'; return; }
+  msg.style.display = 'block';
+  if (p1 === p2) {
+    msg.textContent = '✅ Las contraseñas coinciden';
+    msg.style.color = '#16a34a';
+  } else {
+    msg.textContent = '❌ Las contraseñas no coinciden';
+    msg.style.color = '#e53e3e';
+  }
+}
+
+function ldValidarRegistro() {
+  const p1 = document.getElementById('reg_password').value;
+  const p2 = document.getElementById('reg_password2').value;
+  if (p1.length < 8) { alert('La contraseña debe tener al menos 8 caracteres.'); return; }
+  if (p1 !== p2)     { alert('Las contraseñas no coinciden.'); return; }
+  alert('✅ Formulario válido — en producción crearía la cuenta.');
+}
+</script>
+
+</body>
+</html>
