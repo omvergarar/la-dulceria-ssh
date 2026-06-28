@@ -439,6 +439,59 @@ add_action('wp_head', function () {
     echo '}</style>';
 }, 99);
 
+// ── Asegurar tabla y sincronizar cupón con WooCommerce ────────
+add_action('init', function () {
+    global $wpdb;
+
+    // Crear tabla si no existe (por si el plugin no se reactivó)
+    $charset = $wpdb->get_charset_collate();
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    dbDelta("CREATE TABLE IF NOT EXISTS {$wpdb->prefix}ld_codigos_usados (
+        id       INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        user_id  BIGINT UNSIGNED NOT NULL,
+        codigo   VARCHAR(50) NOT NULL,
+        usado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY user_codigo (user_id, codigo)
+    ) $charset;");
+
+    // Activar cupones en WooCommerce
+    if (get_option('woocommerce_enable_coupons') !== 'yes') {
+        update_option('woocommerce_enable_coupons', 'yes');
+    }
+
+    // Sincronizar cupón del config con WooCommerce
+    $codigo     = strtolower(ld_config('codigo_promo', 'DULCE15'));
+    $descuento  = intval(ld_config('descuento_porcentaje', 15));
+
+    $existing = get_posts(array(
+        'post_type'   => 'shop_coupon',
+        'title'       => $codigo,
+        'post_status' => 'publish',
+        'numberposts' => 1,
+        'fields'      => 'ids',
+    ));
+
+    if (empty($existing)) {
+        $coupon_id = wp_insert_post(array(
+            'post_title'   => $codigo,
+            'post_content' => '',
+            'post_status'  => 'publish',
+            'post_author'  => 1,
+            'post_type'    => 'shop_coupon',
+        ));
+        if ($coupon_id && !is_wp_error($coupon_id)) {
+            update_post_meta($coupon_id, 'discount_type',        'percent');
+            update_post_meta($coupon_id, 'coupon_amount',        $descuento);
+            update_post_meta($coupon_id, 'individual_use',       'yes');
+            update_post_meta($coupon_id, 'usage_limit',          '');
+            update_post_meta($coupon_id, 'usage_limit_per_user', 1);
+            update_post_meta($coupon_id, 'expiry_date',          '');
+            update_post_meta($coupon_id, 'free_shipping',        'no');
+        }
+    }
+}, 20);
+
 // ── Registrar uso de cupon al completar orden ─────────────────
 add_action('woocommerce_order_status_completed',  'ld_registrar_uso_cupon');
 add_action('woocommerce_order_status_processing', 'ld_registrar_uso_cupon');
