@@ -28,7 +28,7 @@ jobs:
           port: 21
           protocol: ftp
           local-dir: ./wp-content/themes/la-dulceria/
-          server-dir: domains/ladulceriaregalos.com/public_html/wp-content/themes/la-dulceria/
+          server-dir: wp-content/themes/la-dulceria/
           dangerous-clean-slate: true
           timeout: 60000
           log-level: minimal
@@ -50,7 +50,7 @@ jobs:
           port: 21
           protocol: ftp
           local-dir: ./wp-content/themes/la-dulceria/woocommerce/
-          server-dir: domains/ladulceriaregalos.com/public_html/wp-content/themes/la-dulceria/woocommerce/
+          server-dir: wp-content/themes/la-dulceria/woocommerce/
           dangerous-clean-slate: true
           timeout: 60000
           log-level: minimal
@@ -72,7 +72,7 @@ jobs:
           port: 21
           protocol: ftp
           local-dir: ./wp-content/plugins/dulceria-features/
-          server-dir: domains/ladulceriaregalos.com/public_html/wp-content/plugins/dulceria-features/
+          server-dir: wp-content/plugins/dulceria-features/
           dangerous-clean-slate: true
           timeout: 60000
           log-level: minimal
@@ -94,7 +94,7 @@ jobs:
           port: 21
           protocol: ftp
           local-dir: ./wp-content/plugins/dulceria-wompi/
-          server-dir: domains/ladulceriaregalos.com/public_html/wp-content/plugins/dulceria-wompi/
+          server-dir: wp-content/plugins/dulceria-wompi/
           dangerous-clean-slate: true
           timeout: 60000
           log-level: minimal
