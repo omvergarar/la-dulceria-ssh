@@ -230,17 +230,18 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
         <p style="color:var(--text-medium);margin-top:8px;">Te responderemos pronto a través de <strong>administracion@ladulceriaregalos.com</strong></p>
       </div>
       <form id="ldContactoForm">
+        <?php wp_nonce_field('ld_contacto', 'ld_contacto_nonce'); ?>
         <div class="ld-form-group">
           <label class="form-label">Nombre</label>
-          <input type="text" class="form-input" placeholder="Tu nombre" required>
+          <input type="text" name="ld_nombre" class="form-input" placeholder="Tu nombre" required>
         </div>
         <div class="ld-form-group">
           <label class="form-label">Teléfono o correo</label>
-          <input type="text" class="form-input" placeholder="¿Cómo te contactamos?" required>
+          <input type="text" name="ld_contacto_data" class="form-input" placeholder="¿Cómo te contactamos?" required>
         </div>
         <div class="ld-form-group">
           <label class="form-label">Tipo de consulta</label>
-          <select class="form-input" required>
+          <select name="ld_tipo" class="form-input" required>
             <option value="">Selecciona...</option>
             <option>Pedido personalizado</option>
             <option>Información de envíos</option>
@@ -250,7 +251,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
         </div>
         <div class="ld-form-group">
           <label class="form-label">Mensaje</label>
-          <textarea class="form-input" style="resize:none;height:96px;" placeholder="Escríbenos..." required></textarea>
+          <textarea name="ld_mensaje_contacto" class="form-input" style="resize:none;height:96px;" placeholder="Escríbenos..." required></textarea>
         </div>
         <p style="font-size:.7rem;color:var(--text-light);line-height:1.6;margin-bottom:16px;">
           Al enviar este formulario autorizas a <strong>La Dulcería tienda de regalos</strong> el tratamiento de tus datos personales conforme a la <strong>Ley 1581 de 2012</strong> (Colombia).

@@ -120,6 +120,7 @@ add_action('wp_enqueue_scripts', function () {
         'whatsapp'  => defined('WHATSAPP_NUMBER') ? WHATSAPP_NUMBER : '573123501815',
         'currency'  => get_woocommerce_currency_symbol(),
     ]);
+    wp_localize_script('la-dulceria-js', 'ldAjax', ['url' => admin_url('admin-ajax.php')]);
 });
 
 // ── WooCommerce: quitar estilos por defecto ───────────────────
@@ -276,6 +277,43 @@ add_action('wp_ajax_ld_cart_count', 'ld_ajax_cart_count');
 add_action('wp_ajax_nopriv_ld_cart_count', 'ld_ajax_cart_count');
 function ld_ajax_cart_count(): void {
     wp_send_json_success(['count' => WC()->cart->get_cart_contents_count()]);
+}
+
+// ── Formulario de contacto → envío de email ──────────────────
+add_action('wp_ajax_ld_contacto',        'ld_ajax_contacto');
+add_action('wp_ajax_nopriv_ld_contacto', 'ld_ajax_contacto');
+function ld_ajax_contacto(): void {
+    check_ajax_referer('ld_contacto', 'ld_contacto_nonce');
+
+    $nombre   = sanitize_text_field(wp_unslash($_POST['ld_nombre']           ?? ''));
+    $contacto = sanitize_text_field(wp_unslash($_POST['ld_contacto_data']    ?? ''));
+    $tipo     = sanitize_text_field(wp_unslash($_POST['ld_tipo']             ?? ''));
+    $mensaje  = sanitize_textarea_field(wp_unslash($_POST['ld_mensaje_contacto'] ?? ''));
+
+    if (!$nombre || !$contacto || !$tipo || !$mensaje) {
+        wp_send_json_error(['msg' => 'Por favor completa todos los campos.']);
+    }
+
+    $destinatario = 'administracion@ladulceriaregalos.com';
+    $asunto       = '[La Dulcería] Nuevo mensaje de contacto: ' . $tipo;
+    $cuerpo       = "Nuevo mensaje recibido desde el formulario de contacto:\n\n"
+                  . "Nombre: {$nombre}\n"
+                  . "Contacto: {$contacto}\n"
+                  . "Tipo de consulta: {$tipo}\n\n"
+                  . "Mensaje:\n{$mensaje}\n";
+
+    $headers = [
+        'Content-Type: text/plain; charset=UTF-8',
+        'Reply-To: ' . $nombre . ' <' . $contacto . '>',
+    ];
+
+    $enviado = wp_mail($destinatario, $asunto, $cuerpo, $headers);
+
+    if ($enviado) {
+        wp_send_json_success(['msg' => '¡Mensaje enviado!']);
+    } else {
+        wp_send_json_error(['msg' => 'Error al enviar. Por favor intenta de nuevo.']);
+    }
 }
 
 // ── Agregar producto al carrito vía AJAX ──────────────────────

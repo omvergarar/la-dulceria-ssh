@@ -121,8 +121,33 @@
   if (contactoForm) {
     contactoForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      contactoForm.style.display = 'none';
-      document.getElementById('ldContactoMsg').style.display = 'block';
+      const btn = contactoForm.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      const data = new FormData(contactoForm);
+      data.append('action', 'ld_contacto');
+
+      fetch(window.ldAjax?.url || '/wp-admin/admin-ajax.php', {
+        method: 'POST',
+        body: data,
+      })
+        .then(r => r.json())
+        .then(res => {
+          if (res.success) {
+            contactoForm.style.display = 'none';
+            document.getElementById('ldContactoMsg').style.display = 'block';
+          } else {
+            alert(res.data?.msg || 'Error al enviar. Intenta de nuevo.');
+            btn.disabled = false;
+            btn.textContent = 'Enviar mensaje 💌';
+          }
+        })
+        .catch(() => {
+          alert('Error de conexión. Intenta de nuevo.');
+          btn.disabled = false;
+          btn.textContent = 'Enviar mensaje 💌';
+        });
     });
   }
 
