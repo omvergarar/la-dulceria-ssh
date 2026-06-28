@@ -98,6 +98,14 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
       <a href="<?= esc_url(ld_whatsapp_url('Hola! Vi su catálogo en La Dulcería y quiero más información 🌸')) ?>"
          target="_blank" rel="noopener" class="btn-outline">Hablar por WhatsApp</a>
     </div>
+    <?php if (!is_user_logged_in()): ?>
+    <div style="margin-top:14px;">
+      <a href="<?= esc_url(wc_get_page_permalink('myaccount')) ?>"
+         style="display:inline-flex;align-items:center;gap:6px;font-size:.9rem;font-weight:600;color:var(--accent-dark);text-decoration:underline;text-underline-offset:3px;">
+        🔑 Ya tengo cuenta, ingresar
+      </a>
+    </div>
+    <?php endif; ?>
     <div class="ld-hero-stats">
       <div class="ld-stat"><span class="ld-stat-num"><?= $num_categorias ?></span><span class="ld-stat-label">Categorías</span></div>
       <div class="ld-stat"><span class="ld-stat-num"><?= $total_productos ?></span><span class="ld-stat-label">Productos</span></div>
