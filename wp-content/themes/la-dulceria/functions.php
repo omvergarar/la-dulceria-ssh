@@ -39,14 +39,14 @@ add_action('template_redirect', function () {
 }, 1);
 
 // ── Registro: guardar contraseña y nombre en BD ───────────────
-// Forzar opción de WooCommerce: el usuario elige su propia contraseña
+// Forzar opción de WooCommerce: el usuario elige su propia contraseña   
 add_action('init', function () {
     if (get_option('woocommerce_registration_generate_password') !== 'no') {
         update_option('woocommerce_registration_generate_password', 'no');
     }
 }, 5);
 
-// Garantizar que la contraseña del POST se use siempre
+// Garantizar que la contraseña del POST se use siempre  
 add_filter('woocommerce_new_customer_data', function ($data) {
     if (!empty($_POST['password'])) {
         $data['user_pass'] = $_POST['password'];
