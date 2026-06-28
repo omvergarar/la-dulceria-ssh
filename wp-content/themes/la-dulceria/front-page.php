@@ -86,7 +86,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
 
   <div class="ld-hero-content">
     <span class="ld-hero-badge">✨ Regalos únicos en Colombia</span>
-    <h1>El regalo perfecto<br>nace en <em>La Dulcería tienda de regalos</em></h1>
+    <h1>El regalo perfecto nace en <em>La Dulcería tienda de regalos</em></h1>
     <div class="ld-hero-desc">
       <p style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:600;color:var(--text-dark);">Más que regalos, creamos emociones que perduran.</p>
       <p>Lo que comenzó como un sueño lleno de ilusión, hoy se ha convertido en un espacio donde cada detalle cuenta una historia.</p>
