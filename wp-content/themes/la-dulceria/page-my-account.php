@@ -150,8 +150,12 @@ get_header();
 
 <?php if (is_user_logged_in()): ?>
 
-<?php if (is_wc_endpoint_url()):
-    // Subpágina (pedidos, direcciones, datos) — WooCommerce la maneja
+<?php
+$wc_endpoint = WC()->query->get_current_endpoint();
+if ($wc_endpoint === 'edit-account'):
+    $user = wp_get_current_user();
+    wc_get_template('myaccount/form-edit-account.php', ['user' => $user]);
+elseif (is_wc_endpoint_url()):
     echo do_shortcode('[woocommerce_my_account]');
 else:
     // Dashboard principal — diseño personalizado

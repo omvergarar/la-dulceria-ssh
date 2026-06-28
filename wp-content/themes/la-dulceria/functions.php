@@ -81,6 +81,14 @@ add_filter('woocommerce_registration_redirect', function () {
     return home_url('/');
 });
 
+// Redirigir al inicio en el auto-login post-registro
+add_filter('woocommerce_login_redirect', function ($redirect, $user) {
+    if (!empty($_POST['register'])) {
+        return home_url('/');
+    }
+    return $redirect;
+}, 10, 2);
+
 // ── Soporte del tema ──────────────────────────────────────────
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
