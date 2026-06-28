@@ -44,10 +44,15 @@ $is_admin   = current_user_can('manage_options') || current_user_can('administra
       </a>
 
       <!-- Auth -->
-      <?php if ($logged_in): ?>
+      <?php if ($logged_in):
+        $nombre = $user->first_name ?: $user->display_name;
+        $nombre = mb_strtolower($nombre, 'UTF-8');
+        $nombre = mb_strtoupper(mb_substr($nombre, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($nombre, 1, null, 'UTF-8');
+      ?>
         <div class="ld-navbar-auth" style="display:flex;gap:8px;align-items:center;">
-            <a href="<?= wc_get_account_endpoint_url('') ?>"
-               style="font-size:.875rem;font-weight:600;color:var(--text-medium);">Mi cuenta</a>
+          <span style="font-size:.875rem;font-weight:600;color:var(--accent);">Hola, <?= esc_html($nombre) ?></span>
+          <a href="<?= wc_get_account_endpoint_url('') ?>"
+             style="font-size:.875rem;font-weight:600;color:var(--text-medium);">Mi cuenta</a>
           <a href="<?= wp_logout_url(home_url('/')) ?>"
              style="font-size:.875rem;font-weight:600;color:var(--text-light);">Salir</a>
         </div>
