@@ -150,9 +150,7 @@ get_header();
 
 <?php if (is_user_logged_in()): ?>
 
-<?php
-$wc_endpoint = WC()->query->get_current_endpoint();
-if ($wc_endpoint === 'edit-account'):
+<?php if (is_wc_endpoint_url('edit-account')):
     $user = wp_get_current_user();
     wc_get_template('myaccount/form-edit-account.php', ['user' => $user]);
 elseif (is_wc_endpoint_url()):
