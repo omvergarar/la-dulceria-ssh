@@ -307,3 +307,77 @@ add_action('rest_api_init', function () {
         },
     ]);
 });
+
+// ── Mensaje personalizado por producto en el carrito ──────────
+
+// 1. Mostrar el textarea debajo del nombre de cada ítem
+add_action('woocommerce_after_cart_item_name', function ($cart_item, $cart_item_key) {
+    $msg      = isset($cart_item['ld_mensaje']) ? esc_textarea($cart_item['ld_mensaje']) : '';
+    $palabras = $msg ? count(preg_split('/\s+/', trim($msg), -1, PREG_SPLIT_NO_EMPTY)) : 0;
+    $restantes = 100 - $palabras;
+    ?>
+    <div class="ld-msg-wrap" style="margin-top:10px;">
+        <label style="display:block;font-size:.8rem;font-weight:700;color:#5a3d58;margin-bottom:4px;">
+            Acompaña tu regalo con un mensaje especial
+        </label>
+        <textarea
+            name="ld_mensaje[<?= esc_attr($cart_item_key) ?>]"
+            class="ld-msg-input"
+            rows="3"
+            data-key="<?= esc_attr($cart_item_key) ?>"
+            style="width:100%;padding:8px 10px;border:1.5px solid #ecd6ec;border-radius:10px;font-family:inherit;font-size:.875rem;resize:vertical;color:#2d1a2b;background:#fdf8fd;"
+            placeholder="Escribe aquí tu mensaje (opcional, máximo 100 palabras)..."
+        ><?= $msg ?></textarea>
+        <p class="ld-msg-counter" style="font-size:.75rem;color:#9a7898;margin-top:3px;">
+            <span class="ld-palabras-restantes"><?= $restantes ?></span> palabras disponibles
+        </p>
+    </div>
+    <?php
+}, 10, 2);
+
+// 2. Guardar el mensaje al actualizar el carrito
+add_action('woocommerce_before_calculate_totals', function ($cart) {
+    if (is_admin() && !defined('DOING_AJAX')) return;
+    if (empty($_POST['ld_mensaje']) || !is_array($_POST['ld_mensaje'])) return;
+    foreach ($cart->get_cart() as $key => $item) {
+        if (isset($_POST['ld_mensaje'][$key])) {
+            $raw   = sanitize_textarea_field(wp_unslash($_POST['ld_mensaje'][$key]));
+            $words = preg_split('/\s+/', trim($raw), -1, PREG_SPLIT_NO_EMPTY);
+            if (count($words) > 100) $raw = implode(' ', array_slice($words, 0, 100));
+            $cart->cart_contents[$key]['ld_mensaje'] = $raw;
+        }
+    }
+    WC()->session->set('cart', $cart->cart_contents);
+}, 10, 1);
+
+// 3. Pasar el mensaje al ítem de la orden
+add_action('woocommerce_checkout_create_order_line_item', function ($item, $cart_item_key, $values, $order) {
+    if (!empty($values['ld_mensaje'])) {
+        $item->add_meta_data('Mensaje personalizado', $values['ld_mensaje'], true);
+    }
+}, 10, 4);
+
+// 4. JS: contador de palabras en tiempo real
+add_action('wp_footer', function () {
+    if (!is_cart()) return;
+    ?>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function ldContarPalabras(t) { return t.trim() === '' ? 0 : t.trim().split(/\s+/).length; }
+        document.querySelectorAll('.ld-msg-input').forEach(function (ta) {
+            var counter = ta.closest('.ld-msg-wrap').querySelector('.ld-palabras-restantes');
+            ta.addEventListener('input', function () {
+                var n = ldContarPalabras(ta.value);
+                var restantes = 100 - n;
+                if (restantes < 0) {
+                    ta.value = ta.value.trim().split(/\s+/).slice(0, 100).join(' ');
+                    restantes = 0;
+                }
+                counter.textContent = restantes;
+                counter.style.color = restantes <= 10 ? '#e53e3e' : '#9a7898';
+            });
+        });
+    });
+    </script>
+    <?php
+});
