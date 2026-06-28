@@ -428,7 +428,6 @@ else:
           </div>
 
           <?php wp_nonce_field('woocommerce-register', 'woocommerce-register-nonce'); ?>
-          <input type="hidden" name="redirect" value="<?= esc_url(wc_get_account_endpoint_url('edit-account')) ?>">
 
           <button type="submit" name="register" value="Registrarse" class="ld-auth-btn">
             Crear mi cuenta 🌸

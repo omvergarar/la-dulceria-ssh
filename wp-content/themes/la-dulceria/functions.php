@@ -1,6 +1,9 @@
 <?php
 defined('ABSPATH') || exit;
 
+// Reset OPcache al cargar el tema (temporal hasta confirmar deploy estable)
+if (function_exists('opcache_reset')) { opcache_reset(); }
+
 // ── Forzar template page-my-account.php en la página de WooCommerce ──
 add_filter('template_include', function ($template) {
     if (is_account_page() && !is_wc_endpoint_url()) {
