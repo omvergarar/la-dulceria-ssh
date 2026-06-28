@@ -100,15 +100,17 @@ add_action('after_setup_theme', function () {
 
 // ── Encolar estilos y scripts ─────────────────────────────────
 add_action('wp_enqueue_scripts', function () {
+    $css_ver = filemtime(get_template_directory() . '/assets/css/theme.css');
+    $js_ver  = filemtime(get_template_directory() . '/assets/js/theme.js');
     wp_enqueue_style(
         'la-dulceria-theme',
         get_template_directory_uri() . '/assets/css/theme.css',
-        [], '1.0.0'
+        [], $css_ver
     );
     wp_enqueue_script(
         'la-dulceria-js',
         get_template_directory_uri() . '/assets/js/theme.js',
-        [], '1.0.0', true
+        [], $js_ver, true
     );
     wp_localize_script('la-dulceria-js', 'ldConfig', [
         'ajaxUrl'   => admin_url('admin-ajax.php'),
