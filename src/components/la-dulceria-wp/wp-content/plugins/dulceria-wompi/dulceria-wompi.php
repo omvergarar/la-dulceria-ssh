@@ -13,10 +13,11 @@ add_action('plugins_loaded', function () {
 
     class WC_Gateway_Wompi extends WC_Payment_Gateway {
 
-        public $pub_key    = '';
-        public $prv_key    = '';
-        public $evt_secret = '';
-        public $sandbox    = true;
+        public $pub_key        = '';
+        public $prv_key        = '';
+        public $evt_secret     = '';
+        public $integrity_key  = '';
+        public $sandbox        = true;
 
         public function __construct() {
             $this->id                 = 'wompi';
@@ -31,10 +32,11 @@ add_action('plugins_loaded', function () {
 
             $this->title       = $this->get_option('title');
             $this->description = $this->get_option('description');
-            $this->pub_key     = $this->get_option('pub_key') ?: (defined('WOMPI_PUBLIC_KEY') ? WOMPI_PUBLIC_KEY : '');
-            $this->prv_key     = $this->get_option('prv_key') ?: (defined('WOMPI_PRIVATE_KEY') ? WOMPI_PRIVATE_KEY : '');
-            $this->evt_secret  = $this->get_option('evt_secret') ?: (defined('WOMPI_EVENTS_SECRET') ? WOMPI_EVENTS_SECRET : '');
-            $this->sandbox     = $this->get_option('sandbox') === 'yes';
+            $this->pub_key        = $this->get_option('pub_key') ?: (defined('WOMPI_PUBLIC_KEY') ? WOMPI_PUBLIC_KEY : '');
+            $this->prv_key        = $this->get_option('prv_key') ?: (defined('WOMPI_PRIVATE_KEY') ? WOMPI_PRIVATE_KEY : '');
+            $this->evt_secret     = $this->get_option('evt_secret') ?: (defined('WOMPI_EVENTS_SECRET') ? WOMPI_EVENTS_SECRET : '');
+            $this->integrity_key  = $this->get_option('integrity_key') ?: '';
+            $this->sandbox        = $this->get_option('sandbox') === 'yes';
 
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options']);
             add_action('woocommerce_api_wompi_webhook', [$this, 'handle_webhook']);
@@ -47,9 +49,10 @@ add_action('plugins_loaded', function () {
                 'sandbox'     => ['title'=>'Modo pruebas','type'=>'checkbox','label'=>'Usar llaves de staging (pruebas)','default'=>'yes'],
                 'title'       => ['title'=>'Título','type'=>'text','default'=>'Tarjeta, Nequi o PSE — Wompi'],
                 'description' => ['title'=>'Descripción','type'=>'textarea','default'=>'Paga de forma segura con tu tarjeta de crédito/débito, Nequi o PSE.'],
-                'pub_key'     => ['title'=>'Llave pública','type'=>'text','description'=>'pub_prod_... o pub_stag_...'],
-                'prv_key'     => ['title'=>'Llave privada','type'=>'password','description'=>'prv_prod_... o prv_stag_...'],
-                'evt_secret'  => ['title'=>'Secret de eventos','type'=>'password','description'=>'Para verificar webhooks de Wompi'],
+                'pub_key'       => ['title'=>'Llave pública','type'=>'text','description'=>'pub_prod_... o pub_stag_...'],
+                'prv_key'       => ['title'=>'Llave privada','type'=>'password','description'=>'prv_prod_... o prv_stag_...'],
+                'integrity_key' => ['title'=>'Llave de integridad','type'=>'password','description'=>'prod_integrity_... — Desarrolladores → Llaves en comercios.wompi.co'],
+                'evt_secret'    => ['title'=>'Secret de eventos','type'=>'password','description'=>'Para verificar webhooks de Wompi'],
             ];
         }
 
@@ -82,10 +85,9 @@ add_action('plugins_loaded', function () {
             $pub_key     = $this->pub_key;
             $redirect_url = $this->get_return_url($order);
 
-            // Generar firma de integridad
-            $integrity_key = $this->prv_key; // En producción usar el secret de integridad
-            $cadena        = $referencia . $total_cop . 'COP' . $integrity_key;
-            $firma         = hash('sha256', $cadena);
+            // Firma de integridad: referencia + monto_centavos + moneda + llave_integridad
+            $cadena = $referencia . $total_cop . 'COP' . $this->integrity_key;
+            $firma  = hash('sha256', $cadena);
             ?>
             <div style="text-align:center;padding:32px;">
               <p style="color:var(--text-medium);margin-bottom:24px;">Serás redirigido a Wompi para completar tu pago de forma segura.</p>
