@@ -15,3 +15,12 @@ add_filter('woocommerce_available_payment_gateways', function ($gateways) {
     }
     return $gateways;
 }, 999);
+
+// Inyectar llave de integridad y desactivar sandbox en el gateway Wompi
+add_action('woocommerce_init', function () {
+    $gateways = WC()->payment_gateways()->payment_gateways();
+    if (isset($gateways['wompi'])) {
+        $gateways['wompi']->integrity_key = 'prod_integrity_TNEEvb5GyVTxJ0wsbEjHf3ZfTf9RTxWq';
+        $gateways['wompi']->sandbox       = false;
+    }
+});
