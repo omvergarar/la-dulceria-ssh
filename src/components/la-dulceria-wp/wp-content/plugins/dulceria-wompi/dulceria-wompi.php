@@ -13,10 +13,10 @@ add_action('plugins_loaded', function () {
 
     class WC_Gateway_Wompi extends WC_Payment_Gateway {
 
-        public string $pub_key     = '';
-        public string $prv_key     = '';
-        public string $evt_secret  = '';
-        public bool   $sandbox     = true;
+        public $pub_key    = '';
+        public $prv_key    = '';
+        public $evt_secret = '';
+        public $sandbox    = true;
 
         public function __construct() {
             $this->id                 = 'wompi';
@@ -41,7 +41,7 @@ add_action('plugins_loaded', function () {
             add_action('woocommerce_receipt_wompi', [$this, 'receipt_page']);
         }
 
-        public function init_form_fields(): void {
+        public function init_form_fields() {
             $this->form_fields = [
                 'enabled'     => ['title'=>'Habilitar','type'=>'checkbox','label'=>'Habilitar pago con Wompi','default'=>'yes'],
                 'sandbox'     => ['title'=>'Modo pruebas','type'=>'checkbox','label'=>'Usar llaves de staging (pruebas)','default'=>'yes'],
@@ -53,7 +53,14 @@ add_action('plugins_loaded', function () {
             ];
         }
 
-        public function process_payment($order_id): array {
+        public function is_available() {
+            if ($this->enabled !== 'yes') return false;
+            if (empty($this->pub_key)) return false;
+            if (get_woocommerce_currency() !== 'COP') return false;
+            return true;
+        }
+
+        public function process_payment($order_id) {
             $order = wc_get_order($order_id);
             $order->update_status('pending', 'Esperando confirmación de pago Wompi.');
 
@@ -68,7 +75,7 @@ add_action('plugins_loaded', function () {
             ];
         }
 
-        public function receipt_page($order_id): void {
+        public function receipt_page($order_id) {
             $order       = wc_get_order($order_id);
             $referencia  = $order->get_meta('_wompi_referencia');
             $total_cop   = intval($order->get_total() * 100); // en centavos
@@ -96,7 +103,7 @@ add_action('plugins_loaded', function () {
             <?php
         }
 
-        public function handle_webhook(): void {
+        public function handle_webhook() {
             $payload = file_get_contents('php://input');
             $data    = json_decode($payload, true);
 
@@ -146,4 +153,25 @@ add_action('plugins_loaded', function () {
     add_action('init', function () {
         add_rewrite_rule('^wc-api/wompi_webhook/?$', 'index.php?wc-api=wompi_webhook', 'top');
     });
+});
+
+// Diagnóstico temporal — remover después
+add_action('rest_api_init', function () {
+    register_rest_route('ld/v1', '/wompi-debug', [
+        'methods'             => 'GET',
+        'permission_callback' => '__return_true',
+        'callback'            => function () {
+            $settings  = get_option('woocommerce_wompi_settings', []);
+            $gateways  = WC()->payment_gateways()->payment_gateways();
+            $available = WC()->payment_gateways()->get_available_payment_gateways();
+            return new WP_REST_Response([
+                'wompi_settings'    => $settings,
+                'registered'        => isset($gateways['wompi']),
+                'available'         => isset($available['wompi']),
+                'currency'          => get_woocommerce_currency(),
+                'all_gateways'      => array_keys($gateways),
+                'available_gateways'=> array_keys($available),
+            ], 200);
+        },
+    ]);
 });

@@ -46,6 +46,16 @@ add_action('template_redirect', function () {
 add_filter('pre_option_woocommerce_registration_generate_password', function() { return 'no'; });
 update_option('woocommerce_registration_generate_password', 'no');
 
+// ── Forzar Wompi disponible en checkout ──────────────────────
+add_filter('woocommerce_available_payment_gateways', function ($gateways) {
+    if (isset($gateways['wompi'])) return $gateways;
+    $all = WC()->payment_gateways()->payment_gateways();
+    if (isset($all['wompi'])) {
+        $gateways['wompi'] = $all['wompi'];
+    }
+    return $gateways;
+});
+
 // Garantizar que la contraseña del POST se use siempre  
 add_filter('woocommerce_new_customer_data', function ($data) {
     if (!empty($_POST['password'])) {
@@ -100,15 +110,17 @@ add_action('after_setup_theme', function () {
 
 // ── Encolar estilos y scripts ─────────────────────────────────
 add_action('wp_enqueue_scripts', function () {
+    $css_ver = filemtime(get_template_directory() . '/assets/css/theme.css');
+    $js_ver  = filemtime(get_template_directory() . '/assets/js/theme.js');
     wp_enqueue_style(
         'la-dulceria-theme',
         get_template_directory_uri() . '/assets/css/theme.css',
-        [], '1.0.0'
+        [], $css_ver
     );
     wp_enqueue_script(
         'la-dulceria-js',
         get_template_directory_uri() . '/assets/js/theme.js',
-        [], '1.0.0', true
+        [], $js_ver, true
     );
     wp_localize_script('la-dulceria-js', 'ldConfig', [
         'ajaxUrl'   => admin_url('admin-ajax.php'),
@@ -118,6 +130,7 @@ add_action('wp_enqueue_scripts', function () {
         'whatsapp'  => defined('WHATSAPP_NUMBER') ? WHATSAPP_NUMBER : '573123501815',
         'currency'  => get_woocommerce_currency_symbol(),
     ]);
+    wp_localize_script('la-dulceria-js', 'ldAjax', ['url' => admin_url('admin-ajax.php')]);
 });
 
 // ── WooCommerce: quitar estilos por defecto ───────────────────
@@ -276,6 +289,43 @@ function ld_ajax_cart_count(): void {
     wp_send_json_success(['count' => WC()->cart->get_cart_contents_count()]);
 }
 
+// ── Formulario de contacto → envío de email ──────────────────
+add_action('wp_ajax_ld_contacto',        'ld_ajax_contacto');
+add_action('wp_ajax_nopriv_ld_contacto', 'ld_ajax_contacto');
+function ld_ajax_contacto(): void {
+    check_ajax_referer('ld_contacto', 'ld_contacto_nonce');
+
+    $nombre   = sanitize_text_field(wp_unslash($_POST['ld_nombre']           ?? ''));
+    $contacto = sanitize_text_field(wp_unslash($_POST['ld_contacto_data']    ?? ''));
+    $tipo     = sanitize_text_field(wp_unslash($_POST['ld_tipo']             ?? ''));
+    $mensaje  = sanitize_textarea_field(wp_unslash($_POST['ld_mensaje_contacto'] ?? ''));
+
+    if (!$nombre || !$contacto || !$tipo || !$mensaje) {
+        wp_send_json_error(['msg' => 'Por favor completa todos los campos.']);
+    }
+
+    $destinatario = 'administracion@ladulceriaregalos.com';
+    $asunto       = '[La Dulcería] Nuevo mensaje de contacto: ' . $tipo;
+    $cuerpo       = "Nuevo mensaje recibido desde el formulario de contacto:\n\n"
+                  . "Nombre: {$nombre}\n"
+                  . "Contacto: {$contacto}\n"
+                  . "Tipo de consulta: {$tipo}\n\n"
+                  . "Mensaje:\n{$mensaje}\n";
+
+    $headers = [
+        'Content-Type: text/plain; charset=UTF-8',
+        'Reply-To: ' . $nombre . ' <' . $contacto . '>',
+    ];
+
+    $enviado = wp_mail($destinatario, $asunto, $cuerpo, $headers);
+
+    if ($enviado) {
+        wp_send_json_success(['msg' => '¡Mensaje enviado!']);
+    } else {
+        wp_send_json_error(['msg' => 'Error al enviar. Por favor intenta de nuevo.']);
+    }
+}
+
 // ── Agregar producto al carrito vía AJAX ──────────────────────
 add_filter('woocommerce_add_to_cart_fragments', function ($fragments) {
     $count = WC()->cart->get_cart_contents_count();
@@ -301,7 +351,91 @@ add_action('rest_api_init', function () {
             // Transients (caché de BD)
             global $wpdb;
             $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_%' OR option_name LIKE '_site_transient_%'");
-            return new WP_REST_Response(['ok' => true, 'mensaje' => 'Caché purgado correctamente'], 200);
+            $gateways  = WC()->payment_gateways ? WC()->payment_gateways()->payment_gateways() : [];
+            $available = WC()->payment_gateways ? WC()->payment_gateways()->get_available_payment_gateways() : [];
+            return new WP_REST_Response([
+                'ok'                 => true,
+                'mensaje'            => 'Caché purgado correctamente',
+                'wompi_settings'     => get_option('woocommerce_wompi_settings', []),
+                'active_plugins'     => get_option('active_plugins', []),
+                'all_gateways'       => array_keys($gateways),
+                'available_gateways' => array_keys($available),
+                'currency'           => get_woocommerce_currency(),
+            ], 200);
         },
     ]);
+});
+
+// ── Mensaje personalizado por producto en el carrito ──────────
+
+// 1. Mostrar el textarea debajo del nombre de cada ítem
+add_action('woocommerce_after_cart_item_name', function ($cart_item, $cart_item_key) {
+    $msg      = isset($cart_item['ld_mensaje']) ? esc_textarea($cart_item['ld_mensaje']) : '';
+    $palabras = $msg ? count(preg_split('/\s+/', trim($msg), -1, PREG_SPLIT_NO_EMPTY)) : 0;
+    $restantes = 100 - $palabras;
+    ?>
+    <div class="ld-msg-wrap" style="margin-top:10px;">
+        <label style="display:block;font-size:.8rem;font-weight:700;color:#5a3d58;margin-bottom:4px;">
+            Acompaña tu regalo con un mensaje especial
+        </label>
+        <textarea
+            name="ld_mensaje[<?= esc_attr($cart_item_key) ?>]"
+            class="ld-msg-input"
+            rows="3"
+            data-key="<?= esc_attr($cart_item_key) ?>"
+            style="width:100%;padding:8px 10px;border:1.5px solid #ecd6ec;border-radius:10px;font-family:inherit;font-size:.875rem;resize:vertical;color:#2d1a2b;background:#fdf8fd;"
+            placeholder="Escribe aquí tu mensaje (opcional, máximo 100 palabras)..."
+        ><?= $msg ?></textarea>
+        <p class="ld-msg-counter" style="font-size:.75rem;color:#9a7898;margin-top:3px;">
+            <span class="ld-palabras-restantes"><?= $restantes ?></span> palabras disponibles
+        </p>
+    </div>
+    <?php
+}, 10, 2);
+
+// 2. Guardar el mensaje al actualizar el carrito
+add_action('woocommerce_before_calculate_totals', function ($cart) {
+    if (is_admin() && !defined('DOING_AJAX')) return;
+    if (empty($_POST['ld_mensaje']) || !is_array($_POST['ld_mensaje'])) return;
+    foreach ($cart->get_cart() as $key => $item) {
+        if (isset($_POST['ld_mensaje'][$key])) {
+            $raw   = sanitize_textarea_field(wp_unslash($_POST['ld_mensaje'][$key]));
+            $words = preg_split('/\s+/', trim($raw), -1, PREG_SPLIT_NO_EMPTY);
+            if (count($words) > 100) $raw = implode(' ', array_slice($words, 0, 100));
+            $cart->cart_contents[$key]['ld_mensaje'] = $raw;
+        }
+    }
+    WC()->session->set('cart', $cart->cart_contents);
+}, 10, 1);
+
+// 3. Pasar el mensaje al ítem de la orden
+add_action('woocommerce_checkout_create_order_line_item', function ($item, $cart_item_key, $values, $order) {
+    if (!empty($values['ld_mensaje'])) {
+        $item->add_meta_data('Mensaje personalizado', $values['ld_mensaje'], true);
+    }
+}, 10, 4);
+
+// 4. JS: contador de palabras en tiempo real
+add_action('wp_footer', function () {
+    if (!is_cart()) return;
+    ?>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function ldContarPalabras(t) { return t.trim() === '' ? 0 : t.trim().split(/\s+/).length; }
+        document.querySelectorAll('.ld-msg-input').forEach(function (ta) {
+            var counter = ta.closest('.ld-msg-wrap').querySelector('.ld-palabras-restantes');
+            ta.addEventListener('input', function () {
+                var n = ldContarPalabras(ta.value);
+                var restantes = 100 - n;
+                if (restantes < 0) {
+                    ta.value = ta.value.trim().split(/\s+/).slice(0, 100).join(' ');
+                    restantes = 0;
+                }
+                counter.textContent = restantes;
+                counter.style.color = restantes <= 10 ? '#e53e3e' : '#9a7898';
+            });
+        });
+    });
+    </script>
+    <?php
 });

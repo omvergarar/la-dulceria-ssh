@@ -98,6 +98,14 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
       <a href="<?= esc_url(ld_whatsapp_url('Hola! Vi su catálogo en La Dulcería y quiero más información 🌸')) ?>"
          target="_blank" rel="noopener" class="btn-outline">Hablar por WhatsApp</a>
     </div>
+    <?php if (!is_user_logged_in()): ?>
+    <div style="margin-top:14px;">
+      <a href="<?= esc_url(wc_get_page_permalink('myaccount')) ?>"
+         style="display:inline-flex;align-items:center;gap:6px;font-size:.9rem;font-weight:600;color:var(--accent-dark);text-decoration:underline;text-underline-offset:3px;">
+        🔑 Ya tengo cuenta, ingresar
+      </a>
+    </div>
+    <?php endif; ?>
     <div class="ld-hero-stats">
       <div class="ld-stat"><span class="ld-stat-num"><?= $num_categorias ?></span><span class="ld-stat-label">Categorías</span></div>
       <div class="ld-stat"><span class="ld-stat-num"><?= $total_productos ?></span><span class="ld-stat-label">Productos</span></div>
@@ -230,17 +238,18 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
         <p style="color:var(--text-medium);margin-top:8px;">Te responderemos pronto a través de <strong>administracion@ladulceriaregalos.com</strong></p>
       </div>
       <form id="ldContactoForm">
+        <?php wp_nonce_field('ld_contacto', 'ld_contacto_nonce'); ?>
         <div class="ld-form-group">
           <label class="form-label">Nombre</label>
-          <input type="text" class="form-input" placeholder="Tu nombre" required>
+          <input type="text" name="ld_nombre" class="form-input" placeholder="Tu nombre" required>
         </div>
         <div class="ld-form-group">
           <label class="form-label">Teléfono o correo</label>
-          <input type="text" class="form-input" placeholder="¿Cómo te contactamos?" required>
+          <input type="text" name="ld_contacto_data" class="form-input" placeholder="¿Cómo te contactamos?" required>
         </div>
         <div class="ld-form-group">
           <label class="form-label">Tipo de consulta</label>
-          <select class="form-input" required>
+          <select name="ld_tipo" class="form-input" required>
             <option value="">Selecciona...</option>
             <option>Pedido personalizado</option>
             <option>Información de envíos</option>
@@ -250,7 +259,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
         </div>
         <div class="ld-form-group">
           <label class="form-label">Mensaje</label>
-          <textarea class="form-input" style="resize:none;height:96px;" placeholder="Escríbenos..." required></textarea>
+          <textarea name="ld_mensaje_contacto" class="form-input" style="resize:none;height:96px;" placeholder="Escríbenos..." required></textarea>
         </div>
         <p style="font-size:.7rem;color:var(--text-light);line-height:1.6;margin-bottom:16px;">
           Al enviar este formulario autorizas a <strong>La Dulcería tienda de regalos</strong> el tratamiento de tus datos personales conforme a la <strong>Ley 1581 de 2012</strong> (Colombia).
