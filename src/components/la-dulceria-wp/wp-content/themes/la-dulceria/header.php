@@ -38,9 +38,7 @@ $is_admin   = current_user_can('manage_options') || current_user_can('administra
       <!-- Carrito -->
       <a href="<?= wc_get_cart_url() ?>" class="ld-cart-btn" aria-label="Ver carrito">
         🛒
-        <?php if ($cart_count > 0): ?>
-          <span class="ld-cart-count"><?= $cart_count ?></span>
-        <?php endif; ?>
+        <span class="ld-cart-count" <?= $cart_count > 0 ? '' : 'style="display:none"' ?>><?= $cart_count ?></span>
       </a>
 
       <!-- Auth -->
