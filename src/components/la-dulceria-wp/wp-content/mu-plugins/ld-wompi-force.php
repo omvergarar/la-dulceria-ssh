@@ -20,7 +20,7 @@ add_filter('woocommerce_available_payment_gateways', function ($gateways) {
 add_action('woocommerce_init', function () {
     $gateways = WC()->payment_gateways()->payment_gateways();
     if (isset($gateways['wompi'])) {
-        $gateways['wompi']->integrity_key = 'prod_integrity_TNEEvb5GyVTxJ0wsbEjHf3ZfTf9RTxWq';
+        $gateways['wompi']->integrity_key = defined('WOMPI_INTEGRITY_KEY') ? WOMPI_INTEGRITY_KEY : '';
         $gateways['wompi']->sandbox       = false;
     }
 });
