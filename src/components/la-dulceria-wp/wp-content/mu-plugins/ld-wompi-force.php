@@ -20,7 +20,9 @@ add_filter('woocommerce_available_payment_gateways', function ($gateways) {
 add_action('woocommerce_init', function () {
     $gateways = WC()->payment_gateways()->payment_gateways();
     if (isset($gateways['wompi'])) {
-        $gateways['wompi']->integrity_key = defined('WOMPI_INTEGRITY_KEY') ? WOMPI_INTEGRITY_KEY : '';
+        $ik = defined('WOMPI_INTEGRITY_KEY') ? WOMPI_INTEGRITY_KEY : '';
+        $gateways['wompi']->integrity_key = $ik;
+        $gateways['wompi']->prv_key       = $ik; // código cacheado usa prv_key para la firma
         $gateways['wompi']->sandbox       = false;
     }
 });
