@@ -5,6 +5,25 @@
  */
 defined('ABSPATH') || exit;
 
+// ── SMTP para wp_mail (evita el mail() bloqueado de Hostinger) ──
+add_action('phpmailer_init', function ($phpmailer) {
+    if (!defined('LD_SMTP_PASS') || !LD_SMTP_PASS) return;
+    $phpmailer->isSMTP();
+    $phpmailer->Host       = 'smtp.hostinger.com';
+    $phpmailer->SMTPAuth   = true;
+    $phpmailer->Port       = 465;
+    $phpmailer->SMTPSecure = 'ssl';
+    $phpmailer->Username   = 'administracion@ladulceriaregalos.com';
+    $phpmailer->Password   = LD_SMTP_PASS;
+    $phpmailer->From       = 'administracion@ladulceriaregalos.com';
+    $phpmailer->FromName   = 'La Dulcería';
+});
+
+// Garantizar que el correo de admin de WooCommerce apunte a la cuenta correcta
+add_filter('woocommerce_email_recipient_new_order', function () {
+    return 'administracion@ladulceriaregalos.com';
+});
+
 // ── Helpers de manipulación de color ─────────────────────────
 function ld_hex_to_rgb(string $hex): array {
     $hex = ltrim($hex, '#');
