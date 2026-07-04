@@ -509,15 +509,18 @@ function ld_registrar_uso_cupon(int $order_id): void {
     }
 }
 
-// ── Bloquear reuso de cupon ───────────────────────────────────
+// ── Bloquear reuso de cupon y exigir login ────────────────────
 add_filter('woocommerce_coupon_is_valid', 'ld_verificar_uso_cupon', 10, 2);
 function ld_verificar_uso_cupon($valid, $coupon) {
-    if (!$valid || !is_user_logged_in()) return $valid;
+    if (!$valid) return false;
+    if (!is_user_logged_in()) {
+        throw new Exception('Debes iniciar sesión para usar un código de descuento.');
+    }
     global $wpdb;
     $ya_usado = $wpdb->get_var($wpdb->prepare(
         "SELECT COUNT(*) FROM {$wpdb->prefix}ld_codigos_usados WHERE user_id=%d AND codigo=%s",
         get_current_user_id(), strtoupper($coupon->get_code())
     ));
-    if ($ya_usado > 0) throw new Exception('Este codigo ya fue utilizado por tu cuenta.');
+    if ($ya_usado > 0) throw new Exception('Este código ya fue utilizado por tu cuenta.');
     return true;
 }
