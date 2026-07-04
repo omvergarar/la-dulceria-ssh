@@ -17,11 +17,11 @@ add_filter('woocommerce_available_payment_gateways', function ($gateways) {
 }, 999);
 
 // ── Reemplazar panel de temas con versión actualizada ─────────
-add_action('admin_menu', function () {
-    remove_submenu_page('ld-dashboard', 'ld-temas');
-    remove_action('la-dulceria_page_ld-temas', 'ld_page_temas');
-    add_submenu_page('ld-dashboard', 'Temas de color', 'Temas de color', 'manage_options', 'ld-temas', 'ld_page_temas_v2');
-}, 999);
+add_action('current_screen', function ($screen) {
+    if ($screen->id !== 'la-dulceria_page_ld-temas') return;
+    remove_all_actions($screen->id);
+    add_action($screen->id, 'ld_page_temas_v2');
+});
 
 // Callback actualizado para el panel de temas
 function ld_page_temas_v2(): void {
