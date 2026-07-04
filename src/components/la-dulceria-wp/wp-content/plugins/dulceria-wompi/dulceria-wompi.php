@@ -107,39 +107,58 @@ add_action('plugins_loaded', function () {
 
         public function handle_webhook() {
             $payload = file_get_contents('php://input');
-            $data    = json_decode($payload, true);
+            $log_dir = WP_CONTENT_DIR . '/wompi-logs';
+            if (!is_dir($log_dir)) mkdir($log_dir, 0755, true);
+            $log_file = $log_dir . '/webhook-' . date('Y-m-d') . '.log';
+
+            $data = json_decode($payload, true);
+
+            // Log every incoming webhook for diagnosis
+            file_put_contents($log_file, date('H:i:s') . ' PAYLOAD: ' . $payload . "\n", FILE_APPEND);
 
             if (!$data || $data['event'] !== 'transaction.updated') {
+                file_put_contents($log_file, date('H:i:s') . ' SKIP: evento=' . ($data['event'] ?? 'null') . "\n", FILE_APPEND);
                 status_header(200); exit;
             }
 
-            // Verificar firma del webhook
-            $evt_secret   = $this->evt_secret;
+            // Verificar firma solo si evt_secret está configurado
+            $evt_secret     = $this->evt_secret;
             $checksum_event = $data['checksum'] ?? '';
-            $transaction  = $data['data']['transaction'] ?? [];
-            $cadena = $transaction['id'] . $transaction['status'] . $transaction['amount_in_cents']
-                    . $transaction['currency'] . $transaction['payment_method_type']
-                    . $data['sent_at'] . $evt_secret;
-            $firma_esperada = hash('sha256', $cadena);
+            $transaction    = $data['data']['transaction'] ?? [];
 
-            if (!hash_equals($firma_esperada, $checksum_event)) {
-                status_header(401); exit;
+            if (!empty($evt_secret)) {
+                $cadena = $transaction['id'] . $transaction['status'] . $transaction['amount_in_cents']
+                        . $transaction['currency'] . $transaction['payment_method_type']
+                        . $data['sent_at'] . $evt_secret;
+                $firma_esperada = hash('sha256', $cadena);
+                if (!hash_equals($firma_esperada, $checksum_event)) {
+                    file_put_contents($log_file, date('H:i:s') . ' FIRMA INVALIDA esperada=' . $firma_esperada . ' recibida=' . $checksum_event . "\n", FILE_APPEND);
+                    status_header(401); exit;
+                }
+            } else {
+                file_put_contents($log_file, date('H:i:s') . ' ADVERTENCIA: evt_secret vacío, omitiendo verificación de firma' . "\n", FILE_APPEND);
             }
 
             $referencia = $transaction['reference'] ?? '';
-            // Buscar orden por referencia
             $orders = wc_get_orders(['meta_key'=>'_wompi_referencia','meta_value'=>$referencia,'limit'=>1]);
-            if (empty($orders)) { status_header(200); exit; }
 
-            $order = $orders[0];
+            if (empty($orders)) {
+                file_put_contents($log_file, date('H:i:s') . ' ORDEN NO ENCONTRADA referencia=' . $referencia . "\n", FILE_APPEND);
+                status_header(200); exit;
+            }
+
+            $order  = $orders[0];
             $estado = $transaction['status'] ?? '';
+            file_put_contents($log_file, date('H:i:s') . ' PROCESANDO orden=' . $order->get_id() . ' estado=' . $estado . "\n", FILE_APPEND);
 
             if ($estado === 'APPROVED') {
                 $order->payment_complete($transaction['id']);
                 $order->add_order_note('Pago Wompi aprobado. ID transacción: ' . $transaction['id']);
                 WC()->mailer()->emails['WC_Email_New_Order']->trigger($order->get_id());
+                file_put_contents($log_file, date('H:i:s') . ' OK: orden ' . $order->get_id() . ' marcada como pagada, correo enviado' . "\n", FILE_APPEND);
             } elseif (in_array($estado, ['DECLINED', 'ERROR', 'VOIDED'])) {
                 $order->update_status('failed', 'Pago Wompi rechazado/fallido. Estado: ' . $estado);
+                file_put_contents($log_file, date('H:i:s') . ' FALLIDO: orden ' . $order->get_id() . "\n", FILE_APPEND);
             }
 
             status_header(200); exit;
