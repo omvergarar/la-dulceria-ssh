@@ -197,6 +197,14 @@ function ld_page_temas_v2(): void {
     <?php
 }
 
+// ── Ocultar texto "Gratis" en el costo de envío del carrito ──
+add_filter('gettext', function ($translated, $text, $domain) {
+    if ($domain === 'woocommerce' && $text === 'Free!') {
+        return '—';
+    }
+    return $translated;
+}, 10, 3);
+
 // Inyectar llave de integridad y desactivar sandbox en el gateway Wompi
 add_action('woocommerce_init', function () {
     $gateways = WC()->payment_gateways()->payment_gateways();
