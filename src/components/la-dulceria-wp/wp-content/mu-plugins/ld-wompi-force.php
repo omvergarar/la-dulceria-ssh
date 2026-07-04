@@ -24,26 +24,6 @@ add_filter('woocommerce_email_recipient_new_order', function () {
     return 'administracion@ladulceriaregalos.com';
 });
 
-// Notificar al admin en el momento que se crea el pedido (antes del pago)
-add_action('woocommerce_checkout_order_created', function ($order) {
-    $admin  = 'administracion@ladulceriaregalos.com';
-    $id     = $order->get_id();
-    $total  = wc_price($order->get_total());
-    $nombre = $order->get_formatted_billing_full_name();
-    $items  = [];
-    foreach ($order->get_items() as $item) {
-        $items[] = $item->get_name() . ' x' . $item->get_quantity();
-    }
-    $asunto = "[La Dulcería] Nuevo pedido #$id — pendiente de pago";
-    $cuerpo = "Se ha recibido un nuevo pedido pendiente de pago.\n\n"
-            . "Pedido: #$id\n"
-            . "Cliente: $nombre\n"
-            . "Email: " . $order->get_billing_email() . "\n"
-            . "Total: $total\n"
-            . "Productos: " . implode(', ', $items) . "\n\n"
-            . "Ver pedido: " . admin_url("post.php?post=$id&action=edit");
-    wp_mail($admin, $asunto, $cuerpo);
-});
 
 // ── Helpers de manipulación de color ─────────────────────────
 function ld_hex_to_rgb(string $hex): array {
