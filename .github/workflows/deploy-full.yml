@@ -114,7 +114,7 @@ jobs:
           protocol: ftp
           local-dir: ./src/components/la-dulceria-wp/wp-content/mu-plugins/
           server-dir: wp-content/mu-plugins/
-          dangerous-clean-slate: false
+          dangerous-clean-slate: true
           timeout: 60000
           log-level: minimal
           state-name: .ftp-state-mu-${{ github.run_id }}
