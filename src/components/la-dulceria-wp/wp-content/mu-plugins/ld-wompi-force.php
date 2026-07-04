@@ -19,6 +19,7 @@ add_filter('woocommerce_available_payment_gateways', function ($gateways) {
 // ── Reemplazar panel de temas con versión actualizada ─────────
 add_action('admin_menu', function () {
     remove_submenu_page('ld-dashboard', 'ld-temas');
+    remove_action('la-dulceria_page_ld-temas', 'ld_page_temas');
     add_submenu_page('ld-dashboard', 'Temas de color', 'Temas de color', 'manage_options', 'ld-temas', 'ld_page_temas_v2');
 }, 999);
 
