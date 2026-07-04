@@ -205,6 +205,64 @@ add_filter('gettext', function ($translated, $text, $domain) {
     return $translated;
 }, 10, 3);
 
+// ── Webhook Wompi — handler definitivo (mu-plugin, sin OPcache) ──
+add_action('woocommerce_api_wompi_webhook', function () {
+    $log_dir  = WP_CONTENT_DIR . '/wompi-logs';
+    if (!is_dir($log_dir)) mkdir($log_dir, 0755, true);
+    $log_file = $log_dir . '/webhook-' . date('Y-m-d') . '.log';
+
+    $payload = file_get_contents('php://input');
+    $data    = json_decode($payload, true);
+    file_put_contents($log_file, date('H:i:s') . ' MU-PAYLOAD: ' . substr($payload, 0, 200) . "\n", FILE_APPEND);
+
+    if (!$data || ($data['event'] ?? '') !== 'transaction.updated') {
+        file_put_contents($log_file, date('H:i:s') . " MU-SKIP: evento=" . ($data['event'] ?? 'null') . "\n", FILE_APPEND);
+        status_header(200); exit;
+    }
+
+    $transaction    = $data['data']['transaction'] ?? [];
+    $checksum       = $data['signature']['checksum'] ?? '';  // campo correcto
+    $evt_secret     = defined('WOMPI_EVENTS_SECRET') ? WOMPI_EVENTS_SECRET
+                    : get_option('woocommerce_wompi_settings', [])['evt_secret'] ?? '';
+
+    // Verificar firma solo si hay secret configurado
+    if (!empty($evt_secret) && !empty($checksum)) {
+        $cadena         = $transaction['id'] . $transaction['status'] . $transaction['amount_in_cents']
+                        . $data['sent_at'] . $evt_secret;
+        $firma_esperada = hash('sha256', $cadena);
+        if (!hash_equals($firma_esperada, $checksum)) {
+            file_put_contents($log_file, date('H:i:s') . ' MU-FIRMA INVALIDA esperada=' . $firma_esperada . ' recibida=' . $checksum . "\n", FILE_APPEND);
+            status_header(401); exit;
+        }
+    } else {
+        file_put_contents($log_file, date('H:i:s') . " MU-FIRMA OMITIDA secret=" . (empty($evt_secret)?'vacío':'ok') . " checksum=" . (empty($checksum)?'vacío':'ok') . "\n", FILE_APPEND);
+    }
+
+    $referencia = $transaction['reference'] ?? '';
+    $orders     = wc_get_orders(['meta_key' => '_wompi_referencia', 'meta_value' => $referencia, 'limit' => 1]);
+
+    if (empty($orders)) {
+        file_put_contents($log_file, date('H:i:s') . " MU-ORDEN NO ENCONTRADA ref=$referencia\n", FILE_APPEND);
+        status_header(200); exit;
+    }
+
+    $order  = $orders[0];
+    $estado = $transaction['status'] ?? '';
+    file_put_contents($log_file, date('H:i:s') . " MU-PROCESANDO orden=" . $order->get_id() . " estado=$estado\n", FILE_APPEND);
+
+    if ($estado === 'APPROVED') {
+        $order->payment_complete($transaction['id']);
+        $order->add_order_note('Pago Wompi aprobado. ID transacción: ' . $transaction['id']);
+        WC()->mailer()->emails['WC_Email_New_Order']->trigger($order->get_id());
+        file_put_contents($log_file, date('H:i:s') . " MU-OK: orden " . $order->get_id() . " pagada, correo enviado\n", FILE_APPEND);
+    } elseif (in_array($estado, ['DECLINED', 'ERROR', 'VOIDED'])) {
+        $order->update_status('failed', 'Pago Wompi rechazado. Estado: ' . $estado);
+        file_put_contents($log_file, date('H:i:s') . " MU-FALLIDO: orden " . $order->get_id() . "\n", FILE_APPEND);
+    }
+
+    status_header(200); exit;
+}, 1); // priority 1 — antes del handler del plugin normal
+
 // Inyectar llave de integridad y desactivar sandbox en el gateway Wompi
 add_action('woocommerce_init', function () {
     $gateways = WC()->payment_gateways()->payment_gateways();
