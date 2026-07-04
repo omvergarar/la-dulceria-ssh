@@ -123,12 +123,12 @@ add_action('plugins_loaded', function () {
 
             // Verificar firma solo si evt_secret está configurado
             $evt_secret     = $this->evt_secret;
-            $checksum_event = $data['checksum'] ?? '';
+            $checksum_event = $data['signature']['checksum'] ?? ''; // correcto: signature.checksum
             $transaction    = $data['data']['transaction'] ?? [];
 
             if (!empty($evt_secret)) {
+                // Wompi firma: transaction.id + transaction.status + transaction.amount_in_cents + sent_at + secret
                 $cadena = $transaction['id'] . $transaction['status'] . $transaction['amount_in_cents']
-                        . $transaction['currency'] . $transaction['payment_method_type']
                         . $data['sent_at'] . $evt_secret;
                 $firma_esperada = hash('sha256', $cadena);
                 if (!hash_equals($firma_esperada, $checksum_event)) {
