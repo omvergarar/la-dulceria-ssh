@@ -385,46 +385,163 @@ function ld_page_config(): void {
 // TEMAS DE COLOR
 // ═══════════════════════════════════════════════════════════════
 function ld_page_temas(): void {
-    $temas = array(
+    $presets = array(
         array('nombre'=>'Original', 'primary'=>'#fbddf9', 'accent'=>'#c96bc4', 'accent_dark'=>'#a3509e', 'text_dark'=>'#2d1a2b'),
         array('nombre'=>'Azul',     'primary'=>'#dbeafe', 'accent'=>'#3b82f6', 'accent_dark'=>'#1d4ed8', 'text_dark'=>'#1e3a5f'),
         array('nombre'=>'Verde',    'primary'=>'#d1fae5', 'accent'=>'#10b981', 'accent_dark'=>'#065f46', 'text_dark'=>'#064e3b'),
         array('nombre'=>'Naranja',  'primary'=>'#ffedd5', 'accent'=>'#f97316', 'accent_dark'=>'#c2410c', 'text_dark'=>'#431407'),
         array('nombre'=>'Dorado',   'primary'=>'#fef9c3', 'accent'=>'#d97706', 'accent_dark'=>'#92400e', 'text_dark'=>'#451a03'),
+        array('nombre'=>'Fucsia',   'primary'=>'#fce7f3', 'accent'=>'#ec4899', 'accent_dark'=>'#be185d', 'text_dark'=>'#500724'),
     );
 
+    $roles = array(
+        'primary'     => array('label'=>'Color Primario',    'desc'=>'Fondos suaves, tarjetas y áreas de hover',        'css'=>'--primary'),
+        'accent'      => array('label'=>'Color de Acento',   'desc'=>'Botones, enlaces e íconos interactivos',          'css'=>'--accent'),
+        'accent_dark' => array('label'=>'Acento Oscuro',     'desc'=>'Hover de botones, títulos y elementos destacados','css'=>'--accent-dark'),
+        'text_dark'   => array('label'=>'Texto Principal',   'desc'=>'Color del texto en encabezados y párrafos',       'css'=>'--text-dark'),
+    );
+
+    $activo = get_option('ld_tema_activo', $presets[0]);
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ld_nonce']) && wp_verify_nonce($_POST['ld_nonce'], 'ld_temas')) {
-        $idx = intval($_POST['tema_idx'] ?? 0);
-        if (isset($temas[$idx])) {
-            update_option('ld_tema_activo', $temas[$idx]);
-            echo '<div class="notice notice-success is-dismissible"><p>Tema aplicado: <strong>' . esc_html($temas[$idx]['nombre']) . '</strong></p></div>';
-        }
-    }
-
-    $activo = get_option('ld_tema_activo', $temas[0]);
-    echo '<div class="wrap ld-wrap"><h1 style="font-family:Georgia,serif;color:#2d1a2b;">Temas de color</h1>';
-    echo '<p style="color:#5a3d58;margin-bottom:20px;">Selecciona la paleta de colores del sitio.</p>';
-    echo '<form method="post" style="display:flex;flex-wrap:wrap;gap:16px;">';
-    wp_nonce_field('ld_temas', 'ld_nonce');
-
-    foreach ($temas as $i => $t) {
-        $sel    = $activo['nombre'] === $t['nombre'];
-        $border = $sel ? '3px solid ' . $t['accent'] : '3px solid transparent';
-        echo '<div style="background:#fff;border-radius:10px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.08);border:' . $border . ';min-width:140px;">';
-        echo '<div style="display:flex;gap:6px;justify-content:center;margin-bottom:12px;">';
-        echo '<div style="width:28px;height:28px;border-radius:50%;background:' . esc_attr($t['primary']) . ';border:1px solid #eee;"></div>';
-        echo '<div style="width:28px;height:28px;border-radius:50%;background:' . esc_attr($t['accent']) . ';"></div>';
-        echo '<div style="width:28px;height:28px;border-radius:50%;background:' . esc_attr($t['text_dark']) . ';"></div>';
-        echo '</div>';
-        echo '<strong style="display:block;margin-bottom:10px;color:' . esc_attr($t['text_dark']) . ';">' . esc_html($t['nombre']) . '</strong>';
-        if ($sel) {
-            echo '<span style="font-size:.75rem;color:' . esc_attr($t['accent']) . ';font-weight:700;">Activo</span>';
+        if (!empty($_POST['preset_idx']) && isset($presets[intval($_POST['preset_idx'])])) {
+            $nuevo = $presets[intval($_POST['preset_idx'])];
         } else {
-            echo '<button type="submit" name="tema_idx" value="' . $i . '" style="background:' . esc_attr($t['accent']) . ';color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.8125rem;font-weight:600;">Aplicar</button>';
+            $nuevo = array('nombre' => 'Personalizado');
+            foreach (array_keys($roles) as $key) {
+                $val = sanitize_hex_color($_POST[$key] ?? '');
+                $nuevo[$key] = $val ?: $activo[$key];
+            }
         }
-        echo '</div>';
+        update_option('ld_tema_activo', $nuevo);
+        $activo = $nuevo;
+        echo '<div class="notice notice-success is-dismissible"><p>Tema <strong>' . esc_html($nuevo['nombre']) . '</strong> aplicado correctamente.</p></div>';
     }
-    echo '</form></div>';
+
+    ?>
+    <div class="wrap ld-wrap">
+    <h1 style="font-family:Georgia,serif;color:#2d1a2b;">Temas de color</h1>
+    <p style="color:#5a3d58;margin-bottom:28px;font-size:.9rem;">Define la paleta del sitio seleccionando un tema base o ingresando los colores manualmente.</p>
+
+    <style>
+    .ld-temas-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+    @media(max-width:900px){.ld-temas-grid{grid-template-columns:1fr;}}
+    .ld-color-card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);padding:20px 22px;border:2px solid #f5bef2;}
+    .ld-color-card-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+    .ld-color-badge{font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:20px;background:#fbddf9;color:#a3509e;}
+    .ld-color-card h3{font-size:.95rem;font-weight:700;color:#2d1a2b;margin:0;}
+    .ld-color-card p{font-size:.78rem;color:#9a7898;margin:0 0 14px;}
+    .ld-color-inputs{display:flex;align-items:center;gap:10px;}
+    .ld-color-picker{width:44px;height:44px;border:none;border-radius:8px;cursor:pointer;padding:0;background:none;flex-shrink:0;}
+    .ld-hex-input{flex:1;padding:9px 12px;border:1.5px solid #e89ee4;border-radius:8px;font-family:'SF Mono','Cascadia Code',monospace;font-size:.875rem;color:#2d1a2b;background:#fffaff;text-transform:uppercase;}
+    .ld-hex-input:focus{outline:none;border-color:#c96bc4;}
+    .ld-preview-strip{width:100%;height:6px;border-radius:4px;margin-top:10px;}
+    .ld-presets-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;}
+    .ld-preset-btn{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;border:2px solid #f5bef2;background:#fff;cursor:pointer;font-size:.8rem;font-weight:600;color:#5a3d58;transition:.15s;}
+    .ld-preset-btn:hover{border-color:#c96bc4;color:#a3509e;}
+    .ld-preset-btn.active{border-color:#c96bc4;background:#fef6fe;}
+    .ld-preset-swatches{display:flex;gap:4px;}
+    .ld-swatch{width:14px;height:14px;border-radius:50%;}
+    .ld-section-title{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9a7898;margin:0 0 12px;}
+    </style>
+
+    <form method="post" id="ldTemasForm">
+    <?php wp_nonce_field('ld_temas', 'ld_nonce'); ?>
+
+    <p class="ld-section-title">Temas predefinidos — haz clic para cargar</p>
+    <div class="ld-presets-row">
+    <?php foreach ($presets as $i => $p):
+        $es_activo = ($activo['nombre'] === $p['nombre']); ?>
+        <button type="button"
+            class="ld-preset-btn <?= $es_activo ? 'active' : '' ?>"
+            onclick="ldCargarPreset(<?= $i ?>, <?= esc_attr(json_encode($p)) ?>)">
+            <div class="ld-preset-swatches">
+                <div class="ld-swatch" style="background:<?= esc_attr($p['primary']) ?>"></div>
+                <div class="ld-swatch" style="background:<?= esc_attr($p['accent']) ?>"></div>
+                <div class="ld-swatch" style="background:<?= esc_attr($p['accent_dark']) ?>"></div>
+                <div class="ld-swatch" style="background:<?= esc_attr($p['text_dark']) ?>"></div>
+            </div>
+            <?= esc_html($p['nombre']) ?>
+            <?php if ($es_activo): ?><span style="color:#c96bc4;">✓</span><?php endif; ?>
+        </button>
+    <?php endforeach; ?>
+    </div>
+
+    <p class="ld-section-title">Colores del tema — edita los valores manualmente</p>
+    <div class="ld-temas-grid">
+    <?php foreach ($roles as $key => $rol):
+        $valor = esc_attr($activo[$key] ?? '#cccccc'); ?>
+        <div class="ld-color-card" id="card-<?= $key ?>">
+            <div class="ld-color-card-header">
+                <div class="ld-color-badge"><?= esc_html($rol['css']) ?></div>
+                <h3><?= esc_html($rol['label']) ?></h3>
+            </div>
+            <p><?= esc_html($rol['desc']) ?></p>
+            <div class="ld-color-inputs">
+                <input type="color"
+                    class="ld-color-picker"
+                    id="picker-<?= $key ?>"
+                    value="<?= $valor ?>"
+                    oninput="ldSyncHex('<?= $key ?>', this.value)"
+                    style="background:<?= $valor ?>">
+                <input type="text"
+                    class="ld-hex-input"
+                    id="hex-<?= $key ?>"
+                    name="<?= $key ?>"
+                    value="<?= $valor ?>"
+                    maxlength="7"
+                    placeholder="#000000"
+                    oninput="ldSyncPicker('<?= $key ?>', this.value)">
+            </div>
+            <div class="ld-preview-strip" id="strip-<?= $key ?>" style="background:<?= $valor ?>"></div>
+        </div>
+    <?php endforeach; ?>
+    </div>
+
+    <div style="margin-top:24px;display:flex;align-items:center;gap:16px;">
+        <button type="submit" class="button button-primary button-large"
+            style="background:linear-gradient(135deg,#c96bc4,#a3509e);border-color:#a3509e;font-weight:700;padding:10px 28px;font-size:.95rem;">
+            Guardar tema
+        </button>
+        <span style="font-size:.8rem;color:#9a7898;">Los cambios se aplican inmediatamente en el sitio.</span>
+    </div>
+    </form>
+    </div>
+
+    <script>
+    const ldPresets = <?= json_encode($presets) ?>;
+
+    function ldSyncHex(key, val) {
+        const hex = document.getElementById('hex-' + key);
+        const strip = document.getElementById('strip-' + key);
+        const picker = document.getElementById('picker-' + key);
+        hex.value = val.toUpperCase();
+        strip.style.background = val;
+        picker.style.background = val;
+    }
+
+    function ldSyncPicker(key, val) {
+        if (!/^#[0-9a-fA-F]{6}$/.test(val)) return;
+        const picker = document.getElementById('picker-' + key);
+        const strip  = document.getElementById('strip-' + key);
+        picker.value = val;
+        strip.style.background = val;
+        picker.style.background = val;
+    }
+
+    function ldCargarPreset(idx, preset) {
+        document.querySelectorAll('.ld-preset-btn').forEach((b,i) => b.classList.toggle('active', i === idx));
+        ['primary','accent','accent_dark','text_dark'].forEach(k => {
+            if (!preset[k]) return;
+            const v = preset[k];
+            document.getElementById('picker-' + k).value = v;
+            document.getElementById('hex-' + k).value = v.toUpperCase();
+            document.getElementById('strip-' + k).style.background = v;
+            document.getElementById('picker-' + k).style.background = v;
+        });
+    }
+    </script>
+    <?php
 }
 
 // ── Inyectar tema activo en el frontend ───────────────────────
