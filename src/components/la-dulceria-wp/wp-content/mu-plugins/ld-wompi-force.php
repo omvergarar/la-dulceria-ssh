@@ -5,6 +5,49 @@
  */
 defined('ABSPATH') || exit;
 
+// ── Helpers de manipulación de color ─────────────────────────
+function ld_hex_to_rgb(string $hex): array {
+    $hex = ltrim($hex, '#');
+    return [hexdec(substr($hex,0,2)), hexdec(substr($hex,2,2)), hexdec(substr($hex,4,2))];
+}
+function ld_lighten(string $hex, int $amount): string {
+    [$r,$g,$b] = ld_hex_to_rgb($hex);
+    return sprintf('#%02x%02x%02x', min(255,$r+$amount), min(255,$g+$amount), min(255,$b+$amount));
+}
+function ld_darken(string $hex, int $amount): string {
+    [$r,$g,$b] = ld_hex_to_rgb($hex);
+    return sprintf('#%02x%02x%02x', max(0,$r-$amount), max(0,$g-$amount), max(0,$b-$amount));
+}
+function ld_tint(string $hex, float $ratio): string { // mezcla con blanco (ratio 0-1)
+    [$r,$g,$b] = ld_hex_to_rgb($hex);
+    return sprintf('#%02x%02x%02x',
+        intval($r + (255-$r)*$ratio), intval($g + (255-$g)*$ratio), intval($b + (255-$b)*$ratio));
+}
+
+// ── Inyectar variables CSS del tema activo en el frontend ─────
+add_action('wp_head', function () {
+    $defaults = ['primary'=>'#fbddf9','accent'=>'#c96bc4','accent_dark'=>'#a3509e','text_dark'=>'#2d1a2b'];
+    $t = get_option('ld_tema_activo', $defaults);
+    $p  = $t['primary']     ?? $defaults['primary'];
+    $a  = $t['accent']      ?? $defaults['accent'];
+    $ad = $t['accent_dark'] ?? $defaults['accent_dark'];
+    $td = $t['text_dark']   ?? $defaults['text_dark'];
+    echo '<style id="ld-tema-vars">:root{'
+        . '--primary:'       . esc_attr($p)              . ';'
+        . '--primary-dark:'  . esc_attr(ld_darken($p,15)). ';'
+        . '--primary-deeper:'. esc_attr(ld_darken($p,35)). ';'
+        . '--accent:'        . esc_attr($a)              . ';'
+        . '--accent-dark:'   . esc_attr($ad)             . ';'
+        . '--text-dark:'     . esc_attr($td)             . ';'
+        . '--text-medium:'   . esc_attr(ld_lighten($td,47)). ';'
+        . '--text-light:'    . esc_attr(ld_lighten($td,109)). ';'
+        . '--bg-soft:'       . esc_attr(ld_tint($p,0.55)). ';'
+        . '--bg-cream:'      . esc_attr(ld_tint($p,0.85)). ';'
+        . '--shadow-soft:0 4px 24px rgba(0,0,0,0.10);'
+        . '--shadow-hover:0 8px 32px rgba(0,0,0,0.18);'
+        . '}</style>' . "\n";
+}, 5); // priority 5 — antes del CSS del tema
+
 add_filter('woocommerce_available_payment_gateways', function ($gateways) {
     if (isset($gateways['wompi'])) {
         return $gateways;
