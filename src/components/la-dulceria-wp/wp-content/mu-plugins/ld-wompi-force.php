@@ -24,6 +24,21 @@ add_filter('woocommerce_email_recipient_new_order', function () {
     return 'administracion@ladulceriaregalos.com';
 });
 
+// Disparar correos al admin y al cliente cuando se crea el pedido
+add_action('woocommerce_checkout_order_created', function ($order) {
+    $mailer = WC()->mailer();
+
+    // Correo al admin — Nuevo pedido
+    $mailer->emails['WC_Email_New_Order']->trigger($order->get_id());
+
+    // Correo al cliente — Pedido en espera / recibido
+    if (isset($mailer->emails['WC_Email_Customer_On_Hold_Order'])) {
+        $mailer->emails['WC_Email_Customer_On_Hold_Order']->trigger($order->get_id());
+    } elseif (isset($mailer->emails['WC_Email_Customer_Processing_Order'])) {
+        $mailer->emails['WC_Email_Customer_Processing_Order']->trigger($order->get_id());
+    }
+}, 20);
+
 
 // ── Helpers de manipulación de color ─────────────────────────
 function ld_hex_to_rgb(string $hex): array {
