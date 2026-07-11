@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout Preview — La Dulcería</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* === Variables === */
+    :root {
+      --primary: #fbddf9;
+      --primary-dark: #f5bef2;
+      --primary-deeper: #e89ee4;
+      --accent: #c96bc4;
+      --accent-dark: #a3509e;
+      --text-dark: #2d1a2b;
+      --text-medium: #5a3d58;
+      --text-light: #9a7898;
+      --bg-soft: #fef6fe;
+      --bg-cream: #fffaff;
+      --shadow-soft: 0 4px 24px rgba(201,107,196,0.12);
+      --shadow-card: 0 2px 16px rgba(45,26,43,0.08);
+      --radius: 18px;
+      --radius-sm: 10px;
+      --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nunito', sans-serif; color: var(--text-dark); background: var(--bg-cream); }
+
+    /* Navbar mock */
+    .ld-navbar {
+      background: #fff;
+      border-bottom: 1px solid var(--primary);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-soft);
+    }
+    .ld-navbar .logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--accent-dark); }
+    .ld-navbar nav a { margin-left: 24px; color: var(--text-medium); font-weight: 600; font-size: .9rem; }
+
+    /* ===================================================
+       WooCommerce Checkout
+       =================================================== */
+    .page-id-8 form.checkout {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 32px;
+      align-items: start;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+    }
+    .page-id-8 form.checkout #customer_details { grid-column: 1; grid-row: 1; }
+    .page-id-8 form.checkout #order_review_heading { grid-column: 2; grid-row: 1; align-self: start; }
+    .page-id-8 form.checkout #order_review { grid-column: 2; grid-row: 1; margin-top: 46px; }
+    @media (max-width: 768px) {
+      .page-id-8 form.checkout { grid-template-columns: 1fr; }
+      .page-id-8 form.checkout #order_review_heading,
+      .page-id-8 form.checkout #order_review { grid-column: 1; }
+      .page-id-8 form.checkout #order_review { margin-top: 0; }
+    }
+
+    .page-id-8 #customer_details {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      padding: 28px;
+    }
+    .page-id-8 #order_review_heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      color: var(--accent-dark);
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--primary);
+      margin-bottom: 16px;
+    }
+    .page-id-8 #order_review {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      padding: 24px;
+    }
+    .page-id-8 form.checkout h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--accent-dark);
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--primary);
+    }
+    .page-id-8 .form-row { margin-bottom: 14px; }
+    .page-id-8 .form-row label {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text-medium);
+      margin-bottom: 4px;
+      display: block;
+    }
+    .page-id-8 .form-row input,
+    .page-id-8 .form-row select,
+    .page-id-8 .form-row textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--primary-deeper);
+      border-radius: var(--radius-sm);
+      font-family: 'Nunito', sans-serif;
+      font-size: .95rem;
+      color: var(--text-dark);
+      background: var(--bg-cream);
+      outline: none;
+    }
+    .page-id-8 .form-row input:focus,
+    .page-id-8 .form-row select:focus {
+      border-color: var(--accent);
+      background: #fff;
+    }
+    .page-id-8 .form-row-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .page-id-8 .woocommerce-info {
+      background: var(--primary);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius-sm);
+      color: var(--text-medium);
+      font-size: .9rem;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+    }
+    .page-id-8 .woocommerce-info a { color: var(--accent-dark); font-weight: 700; text-decoration: none; }
+    .page-id-8 table.shop_table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .88rem;
+    }
+    .page-id-8 table.shop_table th {
+      color: var(--accent-dark);
+      font-weight: 700;
+      padding: 8px 0;
+      border-bottom: 2px solid var(--primary);
+      text-align: left;
+    }
+    .page-id-8 table.shop_table td {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--primary);
+      vertical-align: middle;
+    }
+    .page-id-8 table.shop_table .order-total td,
+    .page-id-8 table.shop_table .order-total th {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--accent-dark);
+      border-bottom: none;
+    }
+    .page-id-8 #payment {
+      background: var(--bg-soft);
+      border-radius: var(--radius-sm);
+      margin-top: 16px;
+      padding: 16px;
+    }
+    .page-id-8 #payment ul.payment_methods {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 16px;
+    }
+    .page-id-8 #payment ul.payment_methods li {
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      background: #fff;
+      border: 1.5px solid var(--primary-deeper);
+      cursor: pointer;
+    }
+    .page-id-8 #payment ul.payment_methods li.selected {
+      border-color: var(--accent);
+      background: var(--primary);
+    }
+    .page-id-8 #payment ul.payment_methods label {
+      font-weight: 600;
+      color: var(--text-dark);
+      cursor: pointer;
+    }
+    .page-id-8 #payment .payment_box {
+      background: transparent;
+      font-size: .875rem;
+      color: var(--text-medium);
+      padding: 6px 0 0 24px;
+    }
+    .page-id-8 #place_order {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .5px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(201,107,196,.35);
+      margin-top: 8px;
+    }
+    .page-id-8 #place_order:hover {
+      background: linear-gradient(135deg, var(--accent-dark), #7a3a78);
+    }
+    .page-id-8 .woocommerce-privacy-policy-text {
+      font-size: .78rem;
+      color: var(--text-light);
+      margin-bottom: 12px;
+    }
+    .page-id-8 .woocommerce-terms-and-conditions-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .page-id-8 .woocommerce-terms-and-conditions-wrapper label {
+      font-size: .85rem;
+      color: var(--text-medium);
+    }
+    .page-id-8 .woocommerce-terms-and-conditions-wrapper a {
+      color: var(--accent-dark);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body class="page-id-8">
+
+  <!-- Navbar mock -->
+  <div class="ld-navbar">
+    <div class="logo">La Dulcería</div>
+    <nav>
+      <a href="#">Inicio</a>
+      <a href="#">Catálogo</a>
+      <a href="#">Reseñas</a>
+      <a href="#">Contacto</a>
+    </nav>
+  </div>
+
+  <!-- Aviso de cupón -->
+  <div style="max-width:1100px;margin:32px auto 0;padding:0 20px;">
+    <div class="page-id-8">
+      <div class="woocommerce-info">
+        ¿Tienes un cupón? <a href="#">Haz clic aquí para introducir tu código</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout form -->
+  <div class="page-id-8">
+    <form class="checkout">
+
+      <!-- Columna izquierda: datos de facturación -->
+      <div id="customer_details">
+        <h3>Detalles de facturación</h3>
+
+        <div class="form-row form-row-pair">
+          <div class="form-row">
+            <label>Nombre *</label>
+            <input type="text" placeholder="Tu nombre">
+          </div>
+          <div class="form-row">
+            <label>Apellidos *</label>
+            <input type="text" placeholder="Tus apellidos">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label>País / Región *</label>
+          <select>
+            <option>Colombia</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label>Dirección de la calle *</label>
+          <input type="text" placeholder="Calle y número">
+        </div>
+
+        <div class="form-row">
+          <label>Apartamento, habitación, etc.</label>
+          <input type="text" placeholder="Opcional">
+        </div>
+
+        <div class="form-row form-row-pair">
+          <div class="form-row">
+            <label>Ciudad *</label>
+            <input type="text" placeholder="Tu ciudad">
+          </div>
+          <div class="form-row">
+            <label>Departamento *</label>
+            <select>
+              <option>Cundinamarca</option>
+              <option>Antioquia</option>
+              <option>Valle del Cauca</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row form-row-pair">
+          <div class="form-row">
+            <label>Código postal / ZIP (opcional)</label>
+            <input type="text">
+          </div>
+          <div class="form-row">
+            <label>Teléfono (opcional)</label>
+            <input type="tel">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label>Dirección de correo electrónico *</label>
+          <input type="email" placeholder="tu@correo.com">
+        </div>
+
+        <div class="form-row">
+          <label>Notas del pedido (opcional)</label>
+          <textarea rows="3" placeholder="Observaciones sobre tu pedido, p. ej. notas especiales para la entrega."></textarea>
+        </div>
+      </div>
+
+      <!-- Columna derecha: resumen -->
+      <h3 id="order_review_heading">Tu pedido</h3>
+
+      <div id="order_review">
+        <table class="shop_table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th style="text-align:right">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Amor y Armonía <strong>× 1</strong></td>
+              <td style="text-align:right;color:var(--accent-dark);font-weight:600">$55.000,00</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>Subtotal</th>
+              <td style="text-align:right">$55.000,00</td>
+            </tr>
+            <tr>
+              <th>Envío</th>
+              <td style="text-align:right">$20.000,00</td>
+            </tr>
+            <tr class="order-total">
+              <th>Total</th>
+              <td style="text-align:right">$75.000,00</td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <!-- Métodos de pago -->
+        <div id="payment">
+          <ul class="payment_methods">
+            <li class="selected">
+              <input type="radio" name="payment_method" checked>
+              <label>Tarjeta, Nequi o PSE — Wompi</label>
+              <div class="payment_box">Paga de forma segura con tu tarjeta de crédito/débito, Nequi o PSE.</div>
+            </li>
+            <li>
+              <input type="radio" name="payment_method">
+              <label>Transferencia bancaria directa</label>
+            </li>
+          </ul>
+
+          <div class="woocommerce-privacy-policy-text">
+            Tus datos personales se usarán para procesar tu pedido, mejorar tu experiencia en esta web y otros propósitos descritos en nuestra <a href="#" style="color:var(--accent-dark)">política de privacidad</a>.
+          </div>
+
+          <div class="woocommerce-terms-and-conditions-wrapper">
+            <input type="checkbox" id="terms">
+            <label for="terms">He leído y estoy de acuerdo con los <a href="#">términos y condiciones</a> de la web *</label>
+          </div>
+
+          <button type="submit" id="place_order">Realizar el pedido</button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <script>
+    // Highlight método de pago al seleccionar
+    document.querySelectorAll('.payment_methods li').forEach(li => {
+      li.addEventListener('click', () => {
+        document.querySelectorAll('.payment_methods li').forEach(l => l.classList.remove('selected'));
+        li.classList.add('selected');
+        li.querySelector('input[type=radio]').checked = true;
+      });
+    });
+  </script>
+</body>
+</html>
