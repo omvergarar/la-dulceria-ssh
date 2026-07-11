@@ -59,7 +59,7 @@ function ld_tint(string $hex, float $ratio): string { // mezcla con blanco (rati
         intval($r + (255-$r)*$ratio), intval($g + (255-$g)*$ratio), intval($b + (255-$b)*$ratio));
 }
 
-// ── Inyectar variables CSS del tema activo en el frontend ─────
+// ── Inyectar variables CSS del tema activo en el frontend  ─────
 add_action('wp_head', function () {
     $defaults = ['primary'=>'#fbddf9','accent'=>'#c96bc4','accent_dark'=>'#a3509e','text_dark'=>'#2d1a2b'];
     $t = get_option('ld_tema_activo', $defaults);
