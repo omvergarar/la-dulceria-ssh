@@ -289,10 +289,30 @@ add_action('woocommerce_api_wompi_webhook', function () {
     file_put_contents($log_file, date('H:i:s') . " MU-PROCESANDO orden=" . $order->get_id() . " estado=$estado\n", FILE_APPEND);
 
     if ($estado === 'APPROVED') {
-        $order->payment_complete($transaction['id']);
+        $order->payment_complete($transaction['id']); // actualiza estado + dispara correo al cliente
         $order->add_order_note('Pago Wompi aprobado. ID transacción: ' . $transaction['id']);
-        WC()->mailer()->emails['WC_Email_New_Order']->trigger($order->get_id());
-        file_put_contents($log_file, date('H:i:s') . " MU-OK: orden " . $order->get_id() . " pagada, correo enviado\n", FILE_APPEND);
+
+        // Correo directo al admin
+        $order_id = $order->get_id();
+        $items    = [];
+        foreach ($order->get_items() as $item) {
+            $items[] = $item->get_name() . ' x' . $item->get_quantity();
+        }
+        $enviado = wp_mail(
+            'administracion@ladulceriaregalos.com',
+            "[La Dulcería] Pago confirmado — Pedido #$order_id",
+            "Pago confirmado por Wompi.\n\n"
+            . "Pedido: #$order_id\n"
+            . "Cliente: " . $order->get_formatted_billing_full_name() . "\n"
+            . "Email: " . $order->get_billing_email() . "\n"
+            . "Total: $" . number_format($order->get_total(), 0, ',', '.') . " COP\n"
+            . "Productos: " . implode(', ', $items) . "\n"
+            . "ID Wompi: " . $transaction['id'] . "\n\n"
+            . "Ver pedido: " . admin_url("post.php?post=$order_id&action=edit"),
+            ['Content-Type: text/plain; charset=UTF-8']
+        );
+
+        file_put_contents($log_file, date('H:i:s') . " MU-OK: orden $order_id pagada, correo_admin=" . ($enviado?'OK':'FALLO') . "\n", FILE_APPEND);
     } elseif (in_array($estado, ['DECLINED', 'ERROR', 'VOIDED'])) {
         $order->update_status('failed', 'Pago Wompi rechazado. Estado: ' . $estado);
         file_put_contents($log_file, date('H:i:s') . " MU-FALLIDO: orden " . $order->get_id() . "\n", FILE_APPEND);
