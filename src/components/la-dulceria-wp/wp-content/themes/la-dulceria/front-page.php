@@ -118,17 +118,23 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
 <!-- CARACTERÍSTICAS -->
 <section class="ld-features">
   <div class="section-header fade-in"><h2>¿Por qué elegirnos?</h2></div>
+  <?php
+  $base = get_template_directory_uri() . '/assets/images/';
+  $features = [
+    ['img' => $base . 'icono-bolsas-regalo.png', 'tit' => 'Empaques únicos',      'desc' => 'Cada regalo viene en un empaque especial, pensado con amor y atención al detalle.'],
+    ['img' => $base . 'icono-carrito.png',        'tit' => 'Envío rápido',         'desc' => 'Entrega en Bogotá y área metropolitana. Puntualidad garantizada para tu ocasión especial.'],
+    ['img' => $base . 'icono-productos-frescos.png','tit'=> 'Personalización total','desc' => 'Agrega tu mensaje especial a cada regalo. Lo hacemos único para ti.'],
+    ['img' => $base . 'icono-mundo.png',           'tit' => 'Productos frescos',    'desc' => 'Pide desde cualquier parte del mundo, para envíos en Bogotá.'],
+  ];
+  ?>
   <div class="ld-features-grid">
-    <?php foreach ([
-      ['🎁','Empaques únicos','Cada regalo viene en un empaque especial, pensado con amor y atención al detalle.'],
-      ['🚀','Envío rápido','Entrega en Bogotá y área metropolitana. Puntualidad garantizada para tu ocasión especial.'],
-      ['💝','Personalización total','Agrega tu mensaje especial a cada regalo. Lo hacemos único para ti.'],
-      ['🌸','Productos frescos','Trabajamos con proveedores locales para garantizar la mejor calidad en cada pedido.'],
-    ] as [$ico,$tit,$desc]): ?>
+    <?php foreach ($features as $f): ?>
     <div class="ld-feature-card fade-in">
-      <span class="ld-feature-icon"><?= $ico ?></span>
-      <h3><?= $tit ?></h3>
-      <p><?= $desc ?></p>
+      <span class="ld-feature-icon">
+        <img src="<?= esc_url($f['img']) ?>" alt="<?= esc_attr($f['tit']) ?>" width="56" height="56" style="object-fit:contain;">
+      </span>
+      <h3><?= esc_html($f['tit']) ?></h3>
+      <p><?= esc_html($f['desc']) ?></p>
     </div>
     <?php endforeach; ?>
   </div>
