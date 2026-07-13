@@ -17,7 +17,7 @@ $total_productos = wp_count_posts('product')->publish;
 $categorias      = get_terms(['taxonomy'=>'product_cat','hide_empty'=>false,'exclude'=>get_option('default_product_cat')]);
 $num_categorias  = count($categorias);
 $promedio_raw    = $wpdb->get_var("SELECT AVG(estrellas) FROM {$wpdb->prefix}ld_resenas WHERE aprobada=1");
-$promedio        = $promedio_raw ? round($promedio_raw, 1) : 4.9;
+$promedio        = $promedio_raw ? round($promedio_raw, 1) : null;
 $num_resenas     = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}ld_resenas WHERE aprobada=1");
 
 // Config
@@ -109,7 +109,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
     <div class="ld-hero-stats">
       <div class="ld-stat"><span class="ld-stat-num"><?= $num_categorias ?></span><span class="ld-stat-label">Categorías</span></div>
       <div class="ld-stat"><span class="ld-stat-num"><?= $total_productos ?></span><span class="ld-stat-label">Productos</span></div>
-      <div class="ld-stat"><span class="ld-stat-num"><?= $promedio ?></span><span class="ld-stat-label">⭐ Promedio</span></div>
+      <?php if ($promedio): ?><div class="ld-stat"><span class="ld-stat-num"><?= $promedio ?></span><span class="ld-stat-label">⭐ Promedio</span></div><?php endif; ?>
       <div class="ld-stat"><span class="ld-stat-num"><?= $num_resenas ?></span><span class="ld-stat-label">Reseñas</span></div>
     </div>
   </div>
@@ -131,7 +131,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
     <?php foreach ($features as $f): ?>
     <div class="ld-feature-card fade-in">
       <span class="ld-feature-icon">
-        <img src="<?= esc_url($f['img']) ?>" alt="<?= esc_attr($f['tit']) ?>" width="200" height="200" style="object-fit:contain;">
+        <img src="<?= esc_url($f['img']) ?>" alt="<?= esc_attr($f['tit']) ?>">
       </span>
       <h3><?= esc_html($f['tit']) ?></h3>
       <p><?= esc_html($f['desc']) ?></p>
