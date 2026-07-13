@@ -131,7 +131,7 @@ $descuento    = $config['descuento_porcentaje'] ?? 15;
     <?php foreach ($features as $f): ?>
     <div class="ld-feature-card fade-in">
       <span class="ld-feature-icon">
-        <img src="<?= esc_url($f['img']) ?>" alt="<?= esc_attr($f['tit']) ?>" width="56" height="56" style="object-fit:contain;">
+        <img src="<?= esc_url($f['img']) ?>" alt="<?= esc_attr($f['tit']) ?>" width="80" height="80" style="object-fit:contain;">
       </span>
       <h3><?= esc_html($f['tit']) ?></h3>
       <p><?= esc_html($f['desc']) ?></p>
