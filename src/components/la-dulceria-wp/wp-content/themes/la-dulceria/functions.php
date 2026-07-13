@@ -366,6 +366,24 @@ add_action('rest_api_init', function () {
     ]);
 });
 
+// ── Invalidar caché LiteSpeed al guardar/eliminar categorías ──
+add_action('edited_product_cat',  'ld_purge_cat_cache');
+add_action('created_product_cat', 'ld_purge_cat_cache');
+add_action('delete_product_cat',  'ld_purge_cat_cache');
+function ld_purge_cat_cache(): void {
+    clean_term_cache(0, 'product_cat');
+    wp_cache_flush();
+    // Señal a LiteSpeed para purgar la página del catálogo
+    if (class_exists('LiteSpeed_Cache_API')) {
+        LiteSpeed_Cache_API::purge_all();
+    } elseif (function_exists('do_cacheaction')) {
+        do_cacheaction('purge_all');
+    } else {
+        // Header directo compatible con LiteSpeed
+        @header('X-LiteSpeed-Purge: *');
+    }
+}
+
 // ── Mensaje personalizado por producto en el carrito ──────────
 
 // 1. Mostrar el textarea debajo del nombre de cada ítem

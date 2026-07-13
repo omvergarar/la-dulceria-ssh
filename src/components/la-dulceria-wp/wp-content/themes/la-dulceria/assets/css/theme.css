@@ -863,3 +863,131 @@ a { text-decoration: none; color: inherit; }
   color: var(--accent-dark) !important;
   text-decoration: underline !important;
 }
+
+/* ===================================================
+   CATÁLOGO — Hero + Navegación de Categorías
+   =================================================== */
+
+/* Hero */
+.ld-shop-hero {
+  background: linear-gradient(135deg, #fce4fc 0%, #fdf0fd 50%, #f5bef2 100%);
+  padding: 56px 24px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.ld-shop-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e89ee4' fill-opacity='0.12'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.ld-shop-hero-inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
+.ld-shop-hero-eyebrow {
+  font-size: .75rem; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
+}
+.ld-shop-hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  color: var(--text-dark); line-height: 1.15; margin-bottom: 14px;
+}
+.ld-shop-hero-desc { font-size: 1rem; color: var(--text-medium); line-height: 1.6; }
+
+/* Barra de categorías */
+.ld-cat-nav {
+  background: #fff;
+  border-bottom: 1px solid var(--primary-dark);
+  position: sticky; top: 70px; z-index: 200;
+  box-shadow: 0 4px 20px rgba(201,107,196,.1);
+}
+.ld-cat-nav-inner {
+  max-width: 1280px; margin: 0 auto;
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ld-cat-nav-inner::-webkit-scrollbar { display: none; }
+
+/* Chip de categoría */
+.ld-cat-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 18px; border-radius: 50px;
+  border: 2px solid var(--primary-dark);
+  background: var(--bg-soft);
+  color: var(--text-medium);
+  font-weight: 600; font-size: .8125rem;
+  white-space: nowrap; flex-shrink: 0;
+  transition: var(--transition);
+  text-decoration: none;
+}
+.ld-cat-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent-dark);
+  background: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(201,107,196,.2);
+}
+.ld-cat-chip.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(201,107,196,.35);
+}
+.ld-cat-chip.active:hover { transform: translateY(-2px); }
+
+.ld-cat-chip-img {
+  width: 22px; height: 22px;
+  border-radius: 50%; object-fit: cover;
+}
+.ld-cat-chip-icon { font-size: 1rem; line-height: 1; }
+.ld-cat-chip-count {
+  font-size: .7rem; font-weight: 700;
+  background: rgba(0,0,0,.08); border-radius: 50px;
+  padding: 1px 7px; margin-left: 2px;
+}
+.ld-cat-chip.active .ld-cat-chip-count { background: rgba(255,255,255,.25); }
+
+/* Cuerpo del catálogo */
+.ld-shop-body {
+  max-width: 1280px; margin: 0 auto;
+  padding: 36px 24px 64px;
+}
+
+/* Toolbar: conteo + ordenar */
+.ld-shop-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+}
+.ld-shop-count { font-size: .875rem; color: var(--text-light); }
+.ld-shop-sort select {
+  border: 1.5px solid var(--primary-dark); border-radius: 50px;
+  padding: 7px 16px; font-size: .875rem; color: var(--text-dark);
+  background: #fff; font-family: 'Nunito', sans-serif; outline: none;
+  transition: border-color var(--transition);
+}
+.ld-shop-sort select:focus { border-color: var(--accent); }
+
+/* Paginación */
+.ld-shop-pagination { text-align: center; margin-top: 48px; }
+
+/* Estado vacío */
+.ld-shop-empty {
+  text-align: center; padding: 80px 24px;
+}
+.ld-shop-empty-icon { font-size: 4rem; margin-bottom: 20px; }
+.ld-shop-empty h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; color: var(--text-dark); margin-bottom: 10px;
+}
+.ld-shop-empty p { color: var(--text-medium); margin-bottom: 28px; }
+
+@media (max-width: 640px) {
+  .ld-shop-hero { padding: 40px 16px 36px; }
+  .ld-cat-nav { top: 60px; }
+  .ld-cat-nav-inner { padding: 12px 16px; gap: 8px; }
+  .ld-cat-chip { padding: 7px 14px; font-size: .75rem; }
+  .ld-shop-body { padding: 24px 16px 48px; }
+}
