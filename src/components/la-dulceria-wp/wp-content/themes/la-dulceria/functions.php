@@ -49,12 +49,29 @@ update_option('woocommerce_registration_generate_password', 'no');
 // ── Dirección de envío diferente: desmarcado por defecto ─────
 add_filter('woocommerce_ship_to_different_address_checked', '__return_false');
 
-// ── Código postal: obligatorio y sin texto "(opcional)" ───────
+// ── Código postal: dropdown de zonas de envío de WooCommerce ──
 add_filter('woocommerce_checkout_fields', function ($fields) {
-    if (isset($fields['billing']['billing_postcode'])) {
-        $fields['billing']['billing_postcode']['required'] = true;
-        $fields['billing']['billing_postcode']['label']    = 'Código postal / ZIP';
+    if (!isset($fields['billing']['billing_postcode'])) return $fields;
+
+    // Construir opciones desde las zonas de envío definidas en WooCommerce
+    $opciones = ['' => 'Selecciona tu zona…'];
+    $zonas = WC_Shipping_Zones::get_zones();
+    foreach ($zonas as $zona) {
+        $nombre = $zona['zone_name'];
+        $opciones[$nombre] = $nombre;
     }
+
+    $fields['billing']['billing_postcode'] = array_merge(
+        $fields['billing']['billing_postcode'],
+        [
+            'type'     => 'select',
+            'label'    => 'Zona de entrega',
+            'required' => true,
+            'options'  => $opciones,
+            'class'    => ['form-row-wide'],
+        ]
+    );
+
     return $fields;
 });
 
