@@ -81,42 +81,14 @@ add_filter('woocommerce_checkout_fields', function ($fields) {
     return $fields;
 });
 
-// Forzar teléfono obligatorio sobreescribiendo el locale del país
-add_filter('woocommerce_get_country_locale', function ($locale) {
-    foreach ($locale as $country => $fields) {
-        if (isset($locale[$country]['phone'])) {
-            $locale[$country]['phone']['required'] = true;
-            $locale[$country]['phone']['hidden']   = false;
-        }
+// Forzar teléfono obligatorio DESPUÉS de que el locale del país es aplicado
+add_filter('woocommerce_billing_fields', function ($fields) {
+    if (isset($fields['billing_phone'])) {
+        $fields['billing_phone']['required'] = true;
+        $fields['billing_phone']['label']    = 'Teléfono';
     }
-    return $locale;
-});
-
-// Eliminar "(opcional)" del label del teléfono vía JS como respaldo
-add_action('wp_footer', function () {
-    if (!is_checkout()) return;
-    echo "<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var lbl = document.querySelector('#billing_phone_field label');
-        if (lbl) {
-            var opt = lbl.querySelector('.optional');
-            if (opt) opt.remove();
-            if (!lbl.querySelector('.required')) {
-                var req = document.createElement('abbr');
-                req.className = 'required'; req.title = 'requerido'; req.textContent = '*';
-                lbl.appendChild(document.createTextNode(' ')); lbl.appendChild(req);
-            }
-        }
-    });
-    document.body.addEventListener('updated_checkout', function() {
-        var lbl = document.querySelector('#billing_phone_field label');
-        if (lbl) {
-            var opt = lbl.querySelector('.optional');
-            if (opt) opt.remove();
-        }
-    });
-    </script>";
-}, 99);
+    return $fields;
+}, 9999);
 
 // Estilos del checkout: ocultar postcode y mover sección de envío debajo de notas
 add_action('wp_head', function () {
