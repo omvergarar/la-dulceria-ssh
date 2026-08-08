@@ -81,10 +81,33 @@ add_filter('woocommerce_checkout_fields', function ($fields) {
     return $fields;
 });
 
-// Ocultar el wrapper del postcode con CSS
+// Estilos del checkout: ocultar postcode y mover sección de envío debajo de notas
 add_action('wp_head', function () {
     if (!is_checkout()) return;
-    echo '<style>#billing_postcode_field { display:none !important; }</style>';
+    echo '<style>
+#billing_postcode_field { display:none !important; }
+
+/* Mover "¿Enviar a dirección diferente?" debajo de las notas del pedido */
+#customer_details.col2-set,
+#customer_details {
+    display: flex !important;
+    flex-direction: column !important;
+    float: none !important;
+    width: 100% !important;
+}
+#customer_details .col-1,
+#customer_details > .col-1 {
+    float: none !important;
+    width: 100% !important;
+    order: 1;
+}
+#customer_details .col-2,
+#customer_details > .col-2 {
+    float: none !important;
+    width: 100% !important;
+    order: 2;
+}
+</style>';
 });
 
 // Pasar al JS el mapa zona → postcode para actualizar cálculo de envío
