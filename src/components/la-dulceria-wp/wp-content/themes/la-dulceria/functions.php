@@ -90,6 +90,25 @@ add_filter('woocommerce_billing_fields', function ($fields) {
     return $fields;
 }, 9999);
 
+// Eliminar "phone" del locale de Colombia para que no lo marque como opcional
+add_filter('woocommerce_get_country_locale', function ($locale) {
+    $paises = array_keys($locale);
+    foreach ($paises as $pais) {
+        if (isset($locale[$pais]['phone'])) {
+            $locale[$pais]['phone']['required'] = true;
+            $locale[$pais]['phone']['hidden']   = false;
+        }
+    }
+    return $locale;
+}, 9999);
+
+// Validación server-side: bloquear pedido si teléfono vacío
+add_action('woocommerce_checkout_process', function () {
+    if (empty($_POST['billing_phone'])) {
+        wc_add_notice('El campo <strong>Teléfono</strong> es obligatorio.', 'error');
+    }
+});
+
 // Estilos del checkout: ocultar postcode y mover sección de envío debajo de notas
 add_action('wp_head', function () {
     if (!is_checkout()) return;
