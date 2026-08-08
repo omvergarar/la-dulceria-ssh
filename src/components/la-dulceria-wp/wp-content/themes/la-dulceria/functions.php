@@ -109,6 +109,36 @@ add_action('woocommerce_checkout_process', function () {
     }
 });
 
+// JS: forzar campo teléfono como obligatorio en el DOM después de cada actualización AJAX
+add_action('wp_footer', function () {
+    if (!is_checkout()) return;
+    ?>
+    <script>
+    function ldFixPhoneField() {
+        var wrap  = document.getElementById('billing_phone_field');
+        var input = document.getElementById('billing_phone');
+        var label = wrap ? wrap.querySelector('label') : null;
+
+        if (wrap)  { wrap.classList.add('validate-required'); }
+        if (input) { input.setAttribute('required', 'required'); }
+        if (label) {
+            var opt = label.querySelector('.optional');
+            if (opt) opt.remove();
+            if (!label.querySelector('.required')) {
+                var abbr = document.createElement('abbr');
+                abbr.className = 'required';
+                abbr.title = 'requerido';
+                abbr.textContent = ' *';
+                label.appendChild(abbr);
+            }
+        }
+    }
+    document.addEventListener('DOMContentLoaded', ldFixPhoneField);
+    document.body.addEventListener('updated_checkout', ldFixPhoneField);
+    </script>
+    <?php
+}, 99);
+
 // Estilos del checkout: ocultar postcode y mover sección de envío debajo de notas
 add_action('wp_head', function () {
     if (!is_checkout()) return;
