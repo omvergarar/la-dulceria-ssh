@@ -396,7 +396,6 @@ add_filter('woocommerce_form_field_args', function ($args, $key) {
     }
     return $args;
 }, 10, 2);
-add_filter('woocommerce_checkout_fields', function ($fields) { return $fields; }); // fuerza recarga
 add_action('wp_footer', function () {
     if (!is_checkout()) return;
     echo '<style>#ld-entrega-field label .optional { display:none !important; }</style>';
@@ -463,7 +462,6 @@ add_action('woocommerce_before_order_notes', function ($checkout) {
       <p class="ld-entrega-hint">La entrega mínima es 2 horas desde ahora.</p>
     </div>
     <?php
-})
 });
 
 // 2. Validar que el campo esté presente y sea una fecha futura
