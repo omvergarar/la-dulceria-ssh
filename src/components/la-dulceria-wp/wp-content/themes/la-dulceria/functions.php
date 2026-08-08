@@ -533,7 +533,8 @@ add_action('rest_api_init', function () {
         'permission_callback' => '__return_true',
         'callback'            => function (WP_REST_Request $req) {
             $key = $req->get_param('key');
-            if ($key !== 'ld_purge_k9x2m4r8') {
+            $purge_key = defined('LD_CACHE_PURGE_KEY') ? LD_CACHE_PURGE_KEY : '';
+            if (empty($purge_key) || $key !== $purge_key) {
                 return new WP_Error('forbidden', 'Clave incorrecta', ['status' => 403]);
             }
             // OPcache

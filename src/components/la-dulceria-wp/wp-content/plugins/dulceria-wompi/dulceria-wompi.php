@@ -176,23 +176,3 @@ add_action('plugins_loaded', function () {
     });
 });
 
-// Diagnóstico temporal — remover después
-add_action('rest_api_init', function () {
-    register_rest_route('ld/v1', '/wompi-debug', [
-        'methods'             => 'GET',
-        'permission_callback' => '__return_true',
-        'callback'            => function () {
-            $settings  = get_option('woocommerce_wompi_settings', []);
-            $gateways  = WC()->payment_gateways()->payment_gateways();
-            $available = WC()->payment_gateways()->get_available_payment_gateways();
-            return new WP_REST_Response([
-                'wompi_settings'    => $settings,
-                'registered'        => isset($gateways['wompi']),
-                'available'         => isset($available['wompi']),
-                'currency'          => get_woocommerce_currency(),
-                'all_gateways'      => array_keys($gateways),
-                'available_gateways'=> array_keys($available),
-            ], 200);
-        },
-    ]);
-});
