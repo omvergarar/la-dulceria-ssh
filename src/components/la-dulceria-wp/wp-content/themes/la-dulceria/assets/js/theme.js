@@ -207,47 +207,6 @@
     return d.innerHTML;
   }
 
-  // ── Dropdown zonas de envío en campo código postal ───────────
-  function ldInitZonaSelect() {
-    // ldZonasEnvio se inyecta via wp_footer (después de theme.js),
-    // por eso se lee aquí dentro, en tiempo de ejecución del evento.
-    var zonas = window.ldZonasEnvio;
-    if (!zonas || !zonas.length) return;
-
-    var input = document.getElementById('billing_postcode');
-    if (!input || input.tagName === 'SELECT') return;
-
-    var currentVal = input.value || '';
-
-    var sel = document.createElement('select');
-    sel.id        = 'billing_postcode';
-    sel.name      = 'billing_postcode';
-    sel.className = input.className;
-
-    var ph = document.createElement('option');
-    ph.value = ''; ph.textContent = 'Selecciona tu zona de entrega…';
-    sel.appendChild(ph);
-
-    zonas.forEach(function (nombre) {
-      var o = document.createElement('option');
-      o.value = nombre; o.textContent = nombre;
-      if (nombre === currentVal) o.selected = true;
-      sel.appendChild(o);
-    });
-
-    input.parentNode.replaceChild(sel, input);
-
-    var wrap = sel.closest('.form-row');
-    if (wrap) {
-      var lbl = wrap.querySelector('label');
-      if (lbl) {
-        lbl.innerHTML = 'Zona de entrega <abbr class="required" title="requerido">*</abbr>';
-      }
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', ldInitZonaSelect);
-  document.body.addEventListener('updated_checkout', ldInitZonaSelect);
 
   // ── Picker fecha/hora de entrega (checkout) ───────────────
   const pickerDay   = document.getElementById('ldPickerDay');

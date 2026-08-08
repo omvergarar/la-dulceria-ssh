@@ -49,24 +49,78 @@ update_option('woocommerce_registration_generate_password', 'no');
 // ── Dirección de envío diferente: desmarcado por defecto ─────
 add_filter('woocommerce_ship_to_different_address_checked', '__return_false');
 
-// ── Código postal: marcar como requerido (validación server-side) ──
+// ── Zona de entrega: dropdown propio + ocultar billing_postcode ──
 add_filter('woocommerce_checkout_fields', function ($fields) {
-    if (isset($fields['billing']['billing_postcode'])) {
-        $fields['billing']['billing_postcode']['required'] = true;
+    // Construir opciones desde zonas de envío de WooCommerce
+    $zonas_raw = WC_Shipping_Zones::get_zones();
+    $opciones  = ['' => 'Selecciona tu zona de entrega…'];
+    foreach ($zonas_raw as $zona) {
+        $nombre            = $zona['zone_name'];
+        $opciones[$nombre] = $nombre;
     }
+
+    // Agregar campo select propio en la sección billing
+    $fields['billing']['ld_zona_entrega'] = [
+        'type'     => 'select',
+        'label'    => 'Zona de entrega',
+        'required' => true,
+        'options'  => $opciones,
+        'class'    => ['form-row-wide'],
+        'priority' => 85,
+    ];
+
+    // Ocultar el campo billing_postcode nativo (WooCommerce no permite eliminarlo)
+    if (isset($fields['billing']['billing_postcode'])) {
+        $fields['billing']['billing_postcode']['required'] = false;
+        $fields['billing']['billing_postcode']['class']    = ['hidden'];
+        $fields['billing']['billing_postcode']['label']    = '';
+    }
+
     return $fields;
 });
 
-// ── Inyectar zonas de envío como variable JS global ───────────
-add_action('wp_footer', function () {
+// Ocultar el wrapper del postcode con CSS
+add_action('wp_head', function () {
     if (!is_checkout()) return;
-    $zonas_raw = WC_Shipping_Zones::get_zones();
-    $zonas = [];
-    foreach ($zonas_raw as $zona) {
-        $zonas[] = $zona['zone_name'];
-    }
-    echo '<script>window.ldZonasEnvio = ' . wp_json_encode($zonas) . ';</script>';
+    echo '<style>#billing_postcode_field { display:none !important; }</style>';
 });
+
+// Validar que se haya seleccionado zona
+add_action('woocommerce_checkout_process', function () {
+    if (empty($_POST['ld_zona_entrega'])) {
+        wc_add_notice('Por favor selecciona tu <strong>zona de entrega</strong>.', 'error');
+    }
+});
+
+// Guardar zona en meta de la orden
+add_action('woocommerce_checkout_create_order', function ($order) {
+    if (!empty($_POST['ld_zona_entrega'])) {
+        $zona = sanitize_text_field(wp_unslash($_POST['ld_zona_entrega']));
+        $order->update_meta_data('_ld_zona_entrega', $zona);
+        // Sincronizar también en billing_postcode para compatibilidad
+        $order->set_billing_postcode($zona);
+    }
+});
+
+// Mostrar en el panel admin del pedido
+add_action('woocommerce_admin_order_data_after_billing_address', function ($order) {
+    $zona = $order->get_meta('_ld_zona_entrega');
+    if ($zona) {
+        echo '<p><strong>Zona de entrega:</strong> ' . esc_html($zona) . '</p>';
+    }
+});
+
+// Incluir en emails
+add_filter('woocommerce_email_order_meta_fields', function ($fields, $sent_to_admin, $order) {
+    $zona = $order->get_meta('_ld_zona_entrega');
+    if ($zona) {
+        $fields['ld_zona_entrega'] = [
+            'label' => 'Zona de entrega',
+            'value' => $zona,
+        ];
+    }
+    return $fields;
+}, 10, 3);
 
 // ── Forzar Wompi disponible en checkout ──────────────────────
 add_filter('woocommerce_available_payment_gateways', function ($gateways) {
