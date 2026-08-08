@@ -208,56 +208,46 @@
   }
 
   // ── Dropdown zonas de envío en campo código postal ───────────
-  if (typeof ldZonasEnvio !== 'undefined' && ldZonasEnvio.length) {
-    function ldInitZonaSelect() {
-      const input = document.getElementById('billing_postcode');
-      if (!input) return;
+  function ldInitZonaSelect() {
+    // ldZonasEnvio se inyecta via wp_footer (después de theme.js),
+    // por eso se lee aquí dentro, en tiempo de ejecución del evento.
+    var zonas = window.ldZonasEnvio;
+    if (!zonas || !zonas.length) return;
 
-      const currentVal = input.value || '';
+    var input = document.getElementById('billing_postcode');
+    if (!input || input.tagName === 'SELECT') return;
 
-      // Construir el <select>
-      const sel = document.createElement('select');
-      sel.id        = 'billing_postcode';
-      sel.name      = 'billing_postcode';
-      sel.className = input.className;
-      sel.setAttribute('data-parsley-required', '');
+    var currentVal = input.value || '';
 
-      const placeholder = document.createElement('option');
-      placeholder.value       = '';
-      placeholder.textContent = 'Selecciona tu zona de entrega…';
-      sel.appendChild(placeholder);
+    var sel = document.createElement('select');
+    sel.id        = 'billing_postcode';
+    sel.name      = 'billing_postcode';
+    sel.className = input.className;
 
-      ldZonasEnvio.forEach(function (nombre) {
-        const o = document.createElement('option');
-        o.value       = nombre;
-        o.textContent = nombre;
-        if (nombre === currentVal) o.selected = true;
-        sel.appendChild(o);
-      });
+    var ph = document.createElement('option');
+    ph.value = ''; ph.textContent = 'Selecciona tu zona de entrega…';
+    sel.appendChild(ph);
 
-      // Reemplazar el input por el select
-      input.parentNode.replaceChild(sel, input);
+    zonas.forEach(function (nombre) {
+      var o = document.createElement('option');
+      o.value = nombre; o.textContent = nombre;
+      if (nombre === currentVal) o.selected = true;
+      sel.appendChild(o);
+    });
 
-      // Actualizar label
-      const wrap = sel.closest('.form-row');
-      if (wrap) {
-        const lbl = wrap.querySelector('label');
-        if (lbl) {
-          lbl.textContent = '';
-          lbl.appendChild(document.createTextNode('Zona de entrega '));
-          const req = document.createElement('abbr');
-          req.className   = 'required';
-          req.title       = 'requerido';
-          req.textContent = '*';
-          lbl.appendChild(req);
-        }
+    input.parentNode.replaceChild(sel, input);
+
+    var wrap = sel.closest('.form-row');
+    if (wrap) {
+      var lbl = wrap.querySelector('label');
+      if (lbl) {
+        lbl.innerHTML = 'Zona de entrega <abbr class="required" title="requerido">*</abbr>';
       }
     }
-
-    // Ejecutar al cargar y también cuando WooCommerce refresca el checkout
-    document.addEventListener('DOMContentLoaded', ldInitZonaSelect);
-    document.body.addEventListener('updated_checkout', ldInitZonaSelect);
   }
+
+  document.addEventListener('DOMContentLoaded', ldInitZonaSelect);
+  document.body.addEventListener('updated_checkout', ldInitZonaSelect);
 
   // ── Picker fecha/hora de entrega (checkout) ───────────────
   const pickerDay   = document.getElementById('ldPickerDay');

@@ -57,15 +57,15 @@ add_filter('woocommerce_checkout_fields', function ($fields) {
     return $fields;
 });
 
-// ── Pasar zonas de envío al JS para el dropdown ───────────────
-add_action('wp_enqueue_scripts', function () {
+// ── Inyectar zonas de envío como variable JS global ───────────
+add_action('wp_footer', function () {
     if (!is_checkout()) return;
     $zonas_raw = WC_Shipping_Zones::get_zones();
     $zonas = [];
     foreach ($zonas_raw as $zona) {
         $zonas[] = $zona['zone_name'];
     }
-    wp_localize_script('la-dulceria-js', 'ldZonasEnvio', $zonas);
+    echo '<script>window.ldZonasEnvio = ' . wp_json_encode($zonas) . ';</script>';
 });
 
 // ── Forzar Wompi disponible en checkout ──────────────────────
