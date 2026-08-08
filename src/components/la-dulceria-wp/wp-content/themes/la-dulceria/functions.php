@@ -51,7 +51,6 @@ add_filter('woocommerce_ship_to_different_address_checked', '__return_false');
 
 // ── Zona de entrega: dropdown propio + ocultar billing_postcode ──
 add_filter('woocommerce_checkout_fields', function ($fields) {
-    // Construir opciones desde zonas de envío de WooCommerce
     $zonas_raw = WC_Shipping_Zones::get_zones();
     $opciones  = ['' => 'Selecciona tu zona de entrega…'];
     foreach ($zonas_raw as $zona) {
@@ -59,7 +58,6 @@ add_filter('woocommerce_checkout_fields', function ($fields) {
         $opciones[$nombre] = $nombre;
     }
 
-    // Agregar campo select propio en la sección billing
     $fields['billing']['ld_zona_entrega'] = [
         'type'     => 'select',
         'label'    => 'Zona de entrega',
@@ -69,7 +67,6 @@ add_filter('woocommerce_checkout_fields', function ($fields) {
         'priority' => 85,
     ];
 
-    // Ocultar el campo billing_postcode nativo (WooCommerce no permite eliminarlo)
     if (isset($fields['billing']['billing_postcode'])) {
         $fields['billing']['billing_postcode']['required'] = false;
         $fields['billing']['billing_postcode']['class']    = ['hidden'];
@@ -83,6 +80,38 @@ add_filter('woocommerce_checkout_fields', function ($fields) {
 add_action('wp_head', function () {
     if (!is_checkout()) return;
     echo '<style>#billing_postcode_field { display:none !important; }</style>';
+});
+
+// Pasar al JS el mapa zona → postcode para actualizar cálculo de envío
+add_action('wp_footer', function () {
+    if (!is_checkout()) return;
+
+    $zonas_raw = WC_Shipping_Zones::get_zones();
+    $mapa = []; // [zone_name => postcode_representativo]
+
+    foreach ($zonas_raw as $data) {
+        $zone   = WC_Shipping_Zones::get_zone($data['zone_id']);
+        $nombre = $data['zone_name'];
+
+        // Buscar el primer postcode definido en la zona
+        $postcode = '';
+        foreach ($zone->get_zone_locations() as $loc) {
+            if ($loc->type === 'postcode') {
+                // Eliminar comodines para tener un código limpio
+                $postcode = str_replace(['*', '...'], '', $loc->code);
+                break;
+            }
+        }
+
+        // Si no hay postcode explícito, usar el ID de zona como identificador
+        if (!$postcode) {
+            $postcode = (string) $data['zone_id'];
+        }
+
+        $mapa[$nombre] = $postcode;
+    }
+
+    echo '<script>window.ldZonaMapa = ' . wp_json_encode($mapa) . ';</script>';
 });
 
 // Validar que se haya seleccionado zona

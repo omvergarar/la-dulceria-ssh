@@ -208,6 +208,31 @@
   }
 
 
+  // ── Zona de entrega → actualiza postcode y recalcula envío ──
+  document.addEventListener('DOMContentLoaded', function () {
+    var zonaSelect = document.getElementById('ld_zona_entrega');
+    if (!zonaSelect) return;
+
+    zonaSelect.addEventListener('change', function () {
+      var mapa = window.ldZonaMapa || {};
+      var zona = zonaSelect.value;
+      var postcode = mapa[zona] || zona;
+
+      // Escribir el postcode en el campo oculto de WooCommerce
+      var pcField = document.getElementById('billing_postcode');
+      if (pcField) {
+        pcField.value = postcode;
+        // Disparar evento change para que WooCommerce lo detecte
+        pcField.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      // Pedir a WooCommerce que recalcule totales y métodos de envío
+      if (typeof jQuery !== 'undefined') {
+        jQuery(document.body).trigger('update_checkout', { update_shipping_method: true });
+      }
+    });
+  });
+
   // ── Picker fecha/hora de entrega (checkout) ───────────────
   const pickerDay   = document.getElementById('ldPickerDay');
   const pickerMonth = document.getElementById('ldPickerMonth');
