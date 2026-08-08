@@ -207,4 +207,74 @@
     return d.innerHTML;
   }
 
+  // ── Picker fecha/hora de entrega (checkout) ───────────────
+  const pickerDay   = document.getElementById('ldPickerDay');
+  const pickerMonth = document.getElementById('ldPickerMonth');
+  const pickerYear  = document.getElementById('ldPickerYear');
+  const pickerHour  = document.getElementById('ldPickerHour');
+  const pickerMin   = document.getElementById('ldPickerMin');
+  const hiddenField = document.getElementById('ld_fecha_entrega');
+
+  if (pickerDay && hiddenField) {
+
+    // Rellena los días según mes/año seleccionados
+    function updateDays() {
+      const y = parseInt(pickerYear.value) || new Date().getFullYear();
+      const m = parseInt(pickerMonth.value) || 1;
+      const maxDay = new Date(y, m, 0).getDate();
+      const current = parseInt(pickerDay.value) || 0;
+      pickerDay.innerHTML = '<option value="">Día</option>';
+      for (let d = 1; d <= maxDay; d++) {
+        const o = document.createElement('option');
+        o.value = d;
+        o.textContent = d;
+        if (d === current) o.selected = true;
+        pickerDay.appendChild(o);
+      }
+    }
+
+    // Construye el valor ISO para el input oculto y valida mínimo 2h
+    function syncHidden() {
+      const d = pickerDay.value, mo = pickerMonth.value,
+            y = pickerYear.value, h = pickerHour.value, mi = pickerMin.value;
+      if (!d || !mo || !y || !h || !mi) { hiddenField.value = ''; return; }
+      const pad = n => String(n).padStart(2, '0');
+      const iso = `${y}-${pad(mo)}-${pad(d)}T${h}:${mi}`;
+      const sel = new Date(iso);
+      const min2h = new Date(Date.now() + 2 * 3600 * 1000);
+      hiddenField.value = iso;
+      // Resaltar error visual si la fecha es menor al mínimo
+      const wrap = document.getElementById('ld-entrega-field');
+      if (sel < min2h) {
+        wrap && wrap.classList.add('woocommerce-invalid');
+        hiddenField.value = '';
+      } else {
+        wrap && wrap.classList.remove('woocommerce-invalid');
+      }
+    }
+
+    pickerMonth.addEventListener('change', () => { updateDays(); syncHidden(); });
+    pickerYear.addEventListener('change',  () => { updateDays(); syncHidden(); });
+    pickerDay.addEventListener('change',   syncHidden);
+    pickerHour.addEventListener('change',  syncHidden);
+    pickerMin.addEventListener('change',   syncHidden);
+
+    // Inicializar días
+    updateDays();
+
+    // Pre-rellenar si hay valor guardado (recarga de página con error)
+    if (hiddenField.value) {
+      const dt = new Date(hiddenField.value);
+      if (!isNaN(dt)) {
+        pickerYear.value  = dt.getFullYear();
+        pickerMonth.value = dt.getMonth() + 1;
+        updateDays();
+        pickerDay.value  = dt.getDate();
+        pickerHour.value = String(dt.getHours()).padStart(2, '0');
+        const rawMin = dt.getMinutes();
+        pickerMin.value  = String([0,15,30,45].reduce((a,b) => Math.abs(b-rawMin)<Math.abs(a-rawMin)?b:a)).padStart(2,'0');
+      }
+    }
+  }
+
 })();

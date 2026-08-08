@@ -864,32 +864,55 @@ a { text-decoration: none; color: inherit; }
   text-decoration: underline !important;
 }
 
-/* Campo fecha/hora de entrega */
-#ld-entrega-field input[type="datetime-local"] {
-  width: 100% !important;
-  padding: 11px 14px !important;
-  border: 1.5px solid var(--primary-deeper) !important;
-  border-radius: var(--radius-sm) !important;
-  font-family: 'Nunito', sans-serif !important;
-  font-size: .95rem !important;
-  color: var(--text-dark) !important;
-  background: var(--bg-cream) !important;
-  outline: none !important;
-  transition: border-color var(--transition) !important;
-  cursor: pointer;
-}
-#ld-entrega-field input[type="datetime-local"]:focus {
-  border-color: var(--accent) !important;
-  background: #fff !important;
-}
-#ld-entrega-field label {
+/* Campo fecha/hora de entrega — picker con selects */
+#ld-entrega-field > label {
   font-size: .85rem !important;
   font-weight: 700 !important;
   color: var(--text-medium) !important;
   display: block;
-  margin-bottom: 6px !important;
+  margin-bottom: 10px !important;
 }
 #ld-entrega-field label .required { color: var(--accent) !important; }
+#ld-entrega-field label .optional { display: none !important; }
+
+.ld-picker-wrap {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;
+  background: var(--bg-soft); border: 1.5px solid var(--primary-deeper);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+}
+.ld-picker-group { display: flex; flex-direction: column; gap: 4px; }
+.ld-picker-lbl {
+  font-size: .7rem !important; font-weight: 700 !important;
+  color: var(--text-light) !important; text-transform: uppercase;
+  letter-spacing: .05em; margin: 0 !important;
+}
+.ld-picker-sel {
+  border: 1.5px solid var(--primary-deeper) !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 8px 10px !important;
+  font-size: .9rem !important; font-family: 'Nunito', sans-serif !important;
+  color: var(--text-dark) !important; background: #fff !important;
+  outline: none !important; cursor: pointer;
+  transition: border-color var(--transition);
+  min-width: 80px;
+}
+.ld-picker-sel:focus { border-color: var(--accent) !important; }
+.ld-picker-sep {
+  font-size: 1.2rem; color: var(--primary-deeper);
+  padding-bottom: 6px; align-self: flex-end;
+}
+.ld-entrega-hint {
+  font-size: .78rem !important; color: var(--text-light) !important;
+  margin: 8px 0 0 !important;
+}
+#ld-entrega-field.woocommerce-invalid .ld-picker-wrap {
+  border-color: var(--red) !important;
+}
+@media (max-width: 480px) {
+  .ld-picker-wrap { gap: 8px; padding: 12px; }
+  .ld-picker-sel { min-width: 64px; font-size: .85rem !important; }
+  .ld-picker-sep { display: none; }
+}
 
 /* ===================================================
    CATÁLOGO — Hero + Navegación de Categorías

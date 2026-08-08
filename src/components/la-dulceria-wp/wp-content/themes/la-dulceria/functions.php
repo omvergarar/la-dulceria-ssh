@@ -46,6 +46,9 @@ add_action('template_redirect', function () {
 add_filter('pre_option_woocommerce_registration_generate_password', function() { return 'no'; });
 update_option('woocommerce_registration_generate_password', 'no');
 
+// ── Dirección de envío diferente: desmarcado por defecto ─────
+add_filter('woocommerce_ship_to_different_address_checked', '__return_false');
+
 // ── Forzar Wompi disponible en checkout ──────────────────────
 add_filter('woocommerce_available_payment_gateways', function ($gateways) {
     if (isset($gateways['wompi'])) return $gateways;
@@ -386,26 +389,81 @@ function ld_purge_cat_cache(): void {
 
 // ── Campo: Fecha y Hora de Entrega ────────────────────────────
 
+// Quitar el sufijo "(opcional)" del campo de fecha de entrega
+add_filter('woocommerce_form_field_args', function ($args, $key) {
+    if ($key === 'ld_fecha_entrega') {
+        $args['label_class'][] = 'ld-no-optional';
+    }
+    return $args;
+}, 10, 2);
+add_filter('woocommerce_checkout_fields', function ($fields) { return $fields; }); // fuerza recarga
+add_action('wp_footer', function () {
+    if (!is_checkout()) return;
+    echo '<style>#ld-entrega-field label .optional { display:none !important; }</style>';
+});
+
 // 1. Mostrar el campo en el checkout (antes de las notas del pedido)
 add_action('woocommerce_before_order_notes', function ($checkout) {
-    $min_datetime = date('Y-m-d\TH:i', strtotime('+2 hours'));
-    echo '<div id="ld-entrega-field">';
-    echo '<h3 style="font-family:\'Playfair Display\',serif;font-size:1.1rem;color:var(--accent-dark);margin:24px 0 16px;padding-top:20px;border-top:2px solid var(--primary);">Fecha y Hora de Entrega</h3>';
-    woocommerce_form_field('ld_fecha_entrega', [
-        'type'        => 'text',
-        'class'       => ['form-row-wide'],
-        'label'       => 'Fecha y hora de entrega del pedido <span class="required">*</span>',
-        'placeholder' => 'Selecciona la fecha y hora',
-        'required'    => false, // validamos manualmente para mostrar error localizado
-        'custom_attributes' => [
-            'type'             => 'datetime-local',
-            'min'              => $min_datetime,
-            'style'            => 'cursor:pointer;',
-            'autocomplete'     => 'off',
-        ],
-    ], $checkout->get_value('ld_fecha_entrega'));
-    echo '<p class="ld-entrega-hint" style="font-size:.8rem;color:var(--text-light);margin-top:-10px;margin-bottom:16px;">La entrega mínima es 2 horas desde ahora.</p>';
-    echo '</div>';
+    $val = $checkout->get_value('ld_fecha_entrega') ?: '';
+    ?>
+    <div id="ld-entrega-field" class="form-row form-row-wide">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--accent-dark);margin:24px 0 16px;padding-top:20px;border-top:2px solid var(--primary);">Fecha y Hora de Entrega</h3>
+      <label>Fecha y hora de entrega del pedido <span class="required">*</span></label>
+
+      <!-- Input oculto que se envía con el formulario -->
+      <input type="hidden" name="ld_fecha_entrega" id="ld_fecha_entrega" value="<?= esc_attr($val) ?>">
+
+      <!-- Selector visual de fecha y hora -->
+      <div class="ld-picker-wrap">
+        <!-- Fecha -->
+        <div class="ld-picker-group">
+          <label class="ld-picker-lbl">Día</label>
+          <select id="ldPickerDay" class="ld-picker-sel"><option value="">Día</option></select>
+        </div>
+        <div class="ld-picker-group">
+          <label class="ld-picker-lbl">Mes</label>
+          <select id="ldPickerMonth" class="ld-picker-sel">
+            <option value="">Mes</option>
+            <?php
+            $meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+            foreach ($meses as $i => $m) {
+                echo '<option value="' . ($i+1) . '">' . $m . '</option>';
+            }
+            ?>
+          </select>
+        </div>
+        <div class="ld-picker-group">
+          <label class="ld-picker-lbl">Año</label>
+          <select id="ldPickerYear" class="ld-picker-sel">
+            <option value="">Año</option>
+            <?php
+            $y = (int) date('Y');
+            for ($i = $y; $i <= $y + 2; $i++) echo "<option value='$i'>$i</option>";
+            ?>
+          </select>
+        </div>
+        <div class="ld-picker-sep">—</div>
+        <!-- Hora -->
+        <div class="ld-picker-group">
+          <label class="ld-picker-lbl">Hora</label>
+          <select id="ldPickerHour" class="ld-picker-sel">
+            <option value="">HH</option>
+            <?php for ($h = 0; $h < 24; $h++) printf('<option value="%02d">%02d:00</option>', $h, $h); ?>
+          </select>
+        </div>
+        <div class="ld-picker-group">
+          <label class="ld-picker-lbl">Minutos</label>
+          <select id="ldPickerMin" class="ld-picker-sel">
+            <option value="">MM</option>
+            <?php foreach ([0,15,30,45] as $m) printf('<option value="%02d">:%02d</option>', $m, $m); ?>
+          </select>
+        </div>
+      </div>
+
+      <p class="ld-entrega-hint">La entrega mínima es 2 horas desde ahora.</p>
+    </div>
+    <?php
+})
 });
 
 // 2. Validar que el campo esté presente y sea una fecha futura
