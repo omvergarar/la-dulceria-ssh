@@ -73,6 +73,11 @@ add_filter('woocommerce_checkout_fields', function ($fields) {
         $fields['billing']['billing_postcode']['label']    = '';
     }
 
+    if (isset($fields['billing']['billing_phone'])) {
+        $fields['billing']['billing_phone']['required'] = true;
+        $fields['billing']['billing_phone']['label']    = 'Teléfono';
+    }
+
     return $fields;
 });
 

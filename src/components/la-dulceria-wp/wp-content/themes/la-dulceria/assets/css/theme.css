@@ -674,7 +674,10 @@ a { text-decoration: none; color: inherit; }
   margin: 0 auto;
   padding: 40px 20px 60px;
 }
-.page-id-8 form.checkout #customer_details { grid-column: 1; grid-row: 1; }
+.page-id-8 form.checkout #customer_details { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; }
+/* col-1 = campos de facturación + notas; col-2 = ¿Enviar a dirección diferente? */
+.page-id-8 #customer_details .col-1 { order: 1; }
+.page-id-8 #customer_details .col-2 { order: 2; }
 .page-id-8 form.checkout #order_review_heading { grid-column: 2; grid-row: 1; align-self: start; }
 .page-id-8 form.checkout #order_review { grid-column: 2; grid-row: 1; margin-top: 46px; }
 @media (max-width: 768px) {
