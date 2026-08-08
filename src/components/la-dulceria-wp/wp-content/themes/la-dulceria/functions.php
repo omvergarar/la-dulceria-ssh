@@ -123,6 +123,7 @@ add_action('wp_head', function () {
     if (!is_checkout()) return;
     echo '<style>
 #billing_postcode_field { display:none !important; }
+#billing_phone_field label .optional { display:none !important; }
 
 /* Mover "¿Enviar a dirección diferente?" debajo de las notas del pedido */
 #customer_details.col2-set,
