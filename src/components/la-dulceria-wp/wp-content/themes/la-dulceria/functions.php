@@ -384,6 +384,74 @@ function ld_purge_cat_cache(): void {
     }
 }
 
+// ── Campo: Fecha y Hora de Entrega ────────────────────────────
+
+// 1. Mostrar el campo en el checkout (antes de las notas del pedido)
+add_action('woocommerce_before_order_notes', function ($checkout) {
+    $min_datetime = date('Y-m-d\TH:i', strtotime('+2 hours'));
+    echo '<div id="ld-entrega-field">';
+    echo '<h3 style="font-family:\'Playfair Display\',serif;font-size:1.1rem;color:var(--accent-dark);margin:24px 0 16px;padding-top:20px;border-top:2px solid var(--primary);">Fecha y Hora de Entrega</h3>';
+    woocommerce_form_field('ld_fecha_entrega', [
+        'type'        => 'text',
+        'class'       => ['form-row-wide'],
+        'label'       => 'Fecha y hora de entrega del pedido <span class="required">*</span>',
+        'placeholder' => 'Selecciona la fecha y hora',
+        'required'    => false, // validamos manualmente para mostrar error localizado
+        'custom_attributes' => [
+            'type'             => 'datetime-local',
+            'min'              => $min_datetime,
+            'style'            => 'cursor:pointer;',
+            'autocomplete'     => 'off',
+        ],
+    ], $checkout->get_value('ld_fecha_entrega'));
+    echo '<p class="ld-entrega-hint" style="font-size:.8rem;color:var(--text-light);margin-top:-10px;margin-bottom:16px;">La entrega mínima es 2 horas desde ahora.</p>';
+    echo '</div>';
+});
+
+// 2. Validar que el campo esté presente y sea una fecha futura
+add_action('woocommerce_checkout_process', function () {
+    if (empty($_POST['ld_fecha_entrega'])) {
+        wc_add_notice('Por favor selecciona la <strong>fecha y hora de entrega</strong> del pedido.', 'error');
+        return;
+    }
+    $ts = strtotime(sanitize_text_field(wp_unslash($_POST['ld_fecha_entrega'])));
+    if (!$ts || $ts < time()) {
+        wc_add_notice('La fecha y hora de entrega debe ser en el futuro.', 'error');
+    }
+});
+
+// 3. Guardar en el meta de la orden (compatible con HPOS)
+add_action('woocommerce_checkout_create_order', function ($order) {
+    if (!empty($_POST['ld_fecha_entrega'])) {
+        $val = sanitize_text_field(wp_unslash($_POST['ld_fecha_entrega']));
+        $order->update_meta_data('_ld_fecha_entrega', $val);
+    }
+});
+
+// 4. Mostrar en el panel de administración del pedido
+add_action('woocommerce_admin_order_data_after_billing_address', function ($order) {
+    $val = $order->get_meta('_ld_fecha_entrega');
+    if ($val) {
+        $dt = date_create($val);
+        $formateado = $dt ? date_format($dt, 'd/m/Y H:i') : $val;
+        echo '<p><strong>Fecha y hora de entrega:</strong> ' . esc_html($formateado) . '</p>';
+    }
+});
+
+// 5. Incluir en los emails de la orden al cliente y al admin
+add_filter('woocommerce_email_order_meta_fields', function ($fields, $sent_to_admin, $order) {
+    $val = $order->get_meta('_ld_fecha_entrega');
+    if ($val) {
+        $dt = date_create($val);
+        $formateado = $dt ? date_format($dt, 'd/m/Y \a \l\a\s H:i') : $val;
+        $fields['ld_fecha_entrega'] = [
+            'label' => 'Fecha y hora de entrega',
+            'value' => $formateado,
+        ];
+    }
+    return $fields;
+}, 10, 3);
+
 // ── Mensaje personalizado por producto en el carrito ──────────
 
 // 1. Mostrar el textarea debajo del nombre de cada ítem

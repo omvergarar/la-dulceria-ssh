@@ -298,6 +298,13 @@ add_action('woocommerce_api_wompi_webhook', function () {
         foreach ($order->get_items() as $item) {
             $items[] = $item->get_name() . ' x' . $item->get_quantity();
         }
+        $fecha_entrega_raw = get_post_meta($order_id, '_ld_fecha_entrega', true);
+        $fecha_entrega_fmt = '';
+        if ($fecha_entrega_raw) {
+            $dt = date_create($fecha_entrega_raw);
+            $fecha_entrega_fmt = $dt ? date_format($dt, 'd/m/Y \a \l\a\s H:i') : $fecha_entrega_raw;
+        }
+
         $enviado = wp_mail(
             'administracion@ladulceriaregalos.com',
             "[La Dulcería] Pago confirmado — Pedido #$order_id",
@@ -307,6 +314,7 @@ add_action('woocommerce_api_wompi_webhook', function () {
             . "Email: " . $order->get_billing_email() . "\n"
             . "Total: $" . number_format($order->get_total(), 0, ',', '.') . " COP\n"
             . "Productos: " . implode(', ', $items) . "\n"
+            . ($fecha_entrega_fmt ? "Fecha y hora de entrega: $fecha_entrega_fmt\n" : '')
             . "ID Wompi: " . $transaction['id'] . "\n\n"
             . "Ver pedido: " . admin_url("post.php?post=$order_id&action=edit"),
             ['Content-Type: text/plain; charset=UTF-8']
