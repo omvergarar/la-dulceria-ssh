@@ -49,6 +49,15 @@ update_option('woocommerce_registration_generate_password', 'no');
 // ── Dirección de envío diferente: desmarcado por defecto ─────
 add_filter('woocommerce_ship_to_different_address_checked', '__return_false');
 
+// ── Código postal: obligatorio y sin texto "(opcional)" ───────
+add_filter('woocommerce_checkout_fields', function ($fields) {
+    if (isset($fields['billing']['billing_postcode'])) {
+        $fields['billing']['billing_postcode']['required'] = true;
+        $fields['billing']['billing_postcode']['label']    = 'Código postal / ZIP';
+    }
+    return $fields;
+});
+
 // ── Forzar Wompi disponible en checkout ──────────────────────
 add_filter('woocommerce_available_payment_gateways', function ($gateways) {
     if (isset($gateways['wompi'])) return $gateways;
